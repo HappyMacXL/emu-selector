@@ -1,0 +1,11 @@
+http://www.red-dove.com/config-doc/
+http://wiki.python.org/moin/ConfigParserShootout
+http://stackoverflow.com/questions/5055042/whats-the-best-practice-using-a-settings-file-in-python
+http://docs.python.org/2/install/index.html#inst-config-syntax
+
+
+arguments:
+http://docs.python.org/2/whatsnew/2.7.html#new-module-sysconfig
+
+syntax:
+http://www.python.org/dev/peps/pep-0008/#introduction
