@@ -9,7 +9,7 @@ while :
 do
 	clear
 
-	FILE=$(/opt/selector/filesel.py "CHAMELEONPI" "$TITOL"  "$CARPETA" "$IMATGE" )
+	FILE=$(./filesel.py "CHAMELEONPI" "$TITOL"  "$CARPETA" "$IMATGE" )
 
 	echo $FILE
 

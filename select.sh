@@ -57,15 +57,15 @@ _main ()
 		_main ;;
 		15) 
 		cd /opt/caprice32-4.2.0-src
-		/opt/selector/amstradfiles.sh "CAPRICE " "/roms/amstrad/disk/" "./cap32 " "/opt/selector/imatges/cpc464.png"
+		/opt/selector/amstradfiles.sh "CAPRICE " "/roms/amstrad/disk/" "./cap32 " "./extra/images/cpc464.png"
 		_main ;;
 #v0.3
 		16) 
-		./listfiles_sdl.sh "DGEN " "/roms/megadrive/" "/opt/dgen-sdl-1.32/dgen " "/opt/selector/imatges/megadrive.png"
+		./listfiles_sdl.sh "DGEN " "/roms/megadrive/" "/opt/dgen-sdl-1.32/dgen " "./extra/images/megadrive.png"
 		_main ;;
 
 		17) 
-		./listfiles_sdl.sh "OPENMSX CARTRIDGE" "/roms/msx/" "openmsx -cart" "/opt/selector/imatges/msx.png"
+		./listfiles_sdl.sh "OPENMSX CARTRIDGE" "/roms/msx/" "openmsx -cart" "./extra/images/msx.png"
 		_main ;;
 
 		18) 
@@ -73,13 +73,13 @@ _main ()
 		./atari800
 		_main ;;
 		19) 
-		/opt/selector/listfiles_sdl.sh "RETROARCH SNES " "/roms/snes/" "retroarch -L /opt/ra_cores/pocketsnes-libretro/libretro.so " "/opt/selector/imatges/snes.png"
+		/opt/selector/listfiles_sdl.sh "RETROARCH SNES " "/roms/snes/" "retroarch -L /opt/ra_cores/pocketsnes-libretro/libretro.so " "./extra/images/snes.png"
 		_main ;;
 		20) 
-		/opt/selector/listfiles_sdl.sh "RETROARCH NES " "/roms/nes/" "retroarch -L /usr/lib/libretro-fceu.so " "/opt/selector/imatges/nes.png"
+		/opt/selector/listfiles_sdl.sh "RETROARCH NES " "/roms/nes/" "retroarch -L /usr/lib/libretro-fceu.so " "./extra/images/nes.png"
 		_main ;;
 		21)	
-			/opt/selector/listfiles_sdl.sh "GNUBOY " "/roms/gameboy/" "/opt/gnuboy-1.0.3.orig/sdlgnuboy --scale=4 " "/opt/selector/imatges/gameboy.png"
+			/opt/selector/listfiles_sdl.sh "GNUBOY " "/roms/gameboy/" "/opt/gnuboy-1.0.3.orig/sdlgnuboy --scale=4 " "./extra/images/gameboy.png"
 			_main ;;
 
 
@@ -98,7 +98,7 @@ _main ()
 		  _main ;;
 #v0.3
 		57)	
-			/opt/selector/listfiles_sdl.sh "RETROARCH MAME " "/roms/mame/rom/" "retroarch -L /usr/lib/libretro-imame4all.so " "/opt/selector/imatges/mamesm.png"
+			/opt/selector/listfiles_sdl.sh "RETROARCH MAME " "/roms/mame/rom/" "retroarch -L /usr/lib/libretro-imame4all.so " "./extra/images/mamesm.png"
 			_main ;;
 
 		58)	
@@ -108,10 +108,10 @@ _main ()
 
 		65)
                 cd /opt/arnold
-				/opt/selector/listfiles_sdl.sh "ARNOLD " "/roms/amstrad/disk/" "./arnold -drivea " "/opt/selector/imatges/cpc464.png"
+				/opt/selector/listfiles_sdl.sh "ARNOLD " "/roms/amstrad/disk/" "./arnold -drivea " "./extra/images/cpc464.png"
                   _main ;;
 		71) 
-		/opt/selector/listfiles_sdl.sh "VISUALBOYADVANCE " "/roms/gameboy/" "VisualBoyAdvance --auto-frameskip " "/opt/selector/imatges/gameboy.png"
+		/opt/selector/listfiles_sdl.sh "VISUALBOYADVANCE " "/roms/gameboy/" "VisualBoyAdvance --auto-frameskip " "./extra/images/gameboy.png"
 		_main ;;
 
 #v0.2

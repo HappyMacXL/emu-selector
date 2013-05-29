@@ -12,10 +12,10 @@ pygame.mixer.init()
 pygame.font.init()
 #pygame.joystick.init()
 
-font_name = "imatges/Orbitron-Regular.ttf"
-font2_name = "imatges/QuattrocentoSans-Regular.ttf"
+font_name = "extra/ttf/Orbitron-Regular.ttf"
+font2_name = "extra/ttf/QuattrocentoSans-Regular.ttf"
 
-tada = pygame.mixer.Sound("imatges/ultimate.ogg")
+tada = pygame.mixer.Sound("extra/sounds/ultimate.ogg")
 
 
 screenX = 1920
@@ -38,7 +38,7 @@ items = []
 
 def drawimage( filename ):
 
-    off = pygame.image.load("imatges/"+filename)
+    off = pygame.image.load("extra/images/"+filename)
     if convX != 1 or convY != 1:
             off = pygame.transform.scale( off, (int(off.get_width() * convX), int(off.get_height() *convY)) )
 
@@ -53,7 +53,7 @@ ins = open( "machines.conf", "r" )
 for line in ins:
     line = line.replace("\n", "")
     newitem = line.split("|")
-    img = pygame.image.load("imatges/"+newitem[1]).convert_alpha()
+    img = pygame.image.load("extra/images/"+newitem[1]).convert_alpha()
     if convX != 1 or convY != 1:
         img = pygame.transform.scale( img, (int(img.get_width() * convX), int(img.get_height() *convY)) )
     items.append ( {"nom":newitem[0], "imatge":img, "info":newitem[2], "extemula":newitem[3], "computer":newitem[4], "emula":newitem[5]} )
@@ -61,7 +61,7 @@ ins.close()
 
 tada.play()
 
-ft = pygame.image.load("imatges/fonstram.png").convert()
+ft = pygame.image.load("extra/images/fonstram.png").convert()
 if convX != 1 or convY != 1:
     ft = pygame.transform.scale( ft, (int(ft.get_width() * convX), int(ft.get_height() *convY)) )
 

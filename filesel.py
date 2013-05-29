@@ -27,14 +27,14 @@ screenY = screen.get_height()
 convX = float( screenX ) / float( 1920 )
 convY = float( screenY ) / float( 1080 )
 
-img_folderico = pygame.image.load(execpath+"/imatges/folder.png")
+img_folderico = pygame.image.load(execpath+"/extra/images/folder.png")
 if convX != 1 or convY != 1:
 	img_folderico = pygame.transform.scale( folder, (int(img_folderico.get_width() * convX), int(img_folderico.get_height() *convY)) )
 
 
 # load fonts
-font_name = execpath+"/imatges/Orbitron-Regular.ttf"
-font2_name = execpath+"/imatges/QuattrocentoSans-Regular.ttf"
+font_name = execpath+"/extra/ttf/Orbitron-Regular.ttf"
+font2_name = execpath+"/extra/ttf/QuattrocentoSans-Regular.ttf"
 
 font_titol = pygame.font.Font(font_name, int(48*convY))
 font_subtitol = pygame.font.Font(font_name, int(28*convY))

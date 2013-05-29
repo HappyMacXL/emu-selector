@@ -24,8 +24,8 @@ convX = float( screenX ) / float( 1920 )
 convY = float( screenY ) / float( 1080 )
 
 # load fonts
-font_name = execpath+"/imatges/Orbitron-Regular.ttf"
-font2_name = execpath+"/imatges/QuattrocentoSans-Regular.ttf"
+font_name = execpath+"/extra/ttf/Orbitron-Regular.ttf"
+font2_name = execpath+"/extra/ttf/QuattrocentoSans-Regular.ttf"
 
 font_titol = pygame.font.Font(font_name, int(48*convY))
 font_subtitol = pygame.font.Font(font_name, int(28*convY))
