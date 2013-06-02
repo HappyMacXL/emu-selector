@@ -1,11 +1,9 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*- 
 
-
 import pygame, sys
 from pygame.locals import *
 
-import pygame
 import os
 import random
 import inspect
@@ -13,9 +11,7 @@ import glob
 
 execpath = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) # script directory
 
-pygame.init()
-pygame.mixer.init()
-pygame.font.init()
+
 pygame.key.set_repeat(300, 25)
 
 # init video
@@ -32,9 +28,7 @@ if convX != 1 or convY != 1:
     img_folderico = pygame.transform.scale( folder, (int(img_folderico.get_width() * convX), int(img_folderico.get_height() *convY)) )
 
 
-# load fonts
-font_name = execpath+"/extra/ttf/Orbitron-Regular.ttf"
-font2_name = execpath+"/extra/ttf/QuattrocentoSans-Regular.ttf"
+
 
 font_titol = pygame.font.Font(font_name, int(48*convY))
 font_subtitol = pygame.font.Font(font_name, int(28*convY))
@@ -283,3 +277,5 @@ while True:
     Inici = False
 
 
+if __name__ == "__main__":
+    main()

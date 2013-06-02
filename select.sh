@@ -98,7 +98,7 @@ _main ()
 		  _main ;;
 #v0.3
 		57)	
-			/opt/selector/listfiles_sdl.sh "RETROARCH MAME " "/roms/mame/rom/" "retroarch -L /usr/lib/libretro-imame4all.so " "./extra/images/mamesm.png"
+			./listfiles_sdl.sh "RETROARCH MAME " "/roms/mame/rom/" "retroarch -L /usr/lib/libretro-imame4all.so " "./extra/images/mamesm.png"
 			_main ;;
 
 		58)	
@@ -108,10 +108,10 @@ _main ()
 
 		65)
                 cd /opt/arnold
-				/opt/selector/listfiles_sdl.sh "ARNOLD " "/roms/amstrad/disk/" "./arnold -drivea " "./extra/images/cpc464.png"
+				./listfiles_sdl.sh "ARNOLD " "/roms/amstrad/disk/" "./arnold -drivea " "./extra/images/cpc464.png"
                   _main ;;
 		71) 
-		/opt/selector/listfiles_sdl.sh "VISUALBOYADVANCE " "/roms/gameboy/" "VisualBoyAdvance --auto-frameskip " "./extra/images/gameboy.png"
+		./listfiles_sdl.sh "VISUALBOYADVANCE " "/roms/gameboy/" "VisualBoyAdvance --auto-frameskip " "./extra/images/gameboy.png"
 		_main ;;
 
 #v0.2
@@ -127,7 +127,7 @@ _main ()
 
 #v0.3
 		199) 
-		cd /opt/selector/tools
+		cd ./tools
 		./options_sdl.sh
 		exit ;;
 

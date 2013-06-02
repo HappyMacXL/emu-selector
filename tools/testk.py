@@ -19,7 +19,3 @@ while True:
 		print event.key, event.scancode
 		if  event.key == K_ESCAPE :
 			sys.exit()	
-
-
-
-	
