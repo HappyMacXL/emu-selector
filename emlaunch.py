@@ -18,22 +18,13 @@ tada = pygame.mixer.Sound("extra/sounds/ultimate.ogg")
 screenX = 1920
 screenY = 1080
 pygame.mouse.set_visible( False )
+#screen = pygame.display.set_mode((0,0),FULLSCREEN)
 screen = pygame.display.set_mode((0,0))
-#screen = pygame.display.set_mode((1920,1080))
 screenX = screen.get_width()
 screenY = screen.get_height()
 convX = float( screenX ) / float( 1920 )
 convY = float( screenY ) / float( 1080 )
 print screenX,screenY,convX,convY
-
-
-def drawimage( filename ):
-    #similar to scale_image!!
-    off = pygame.image.load("extra/images/"+filename)
-    if convX != 1 or convY != 1:
-            off = pygame.transform.scale( off, (int(off.get_width() * convX), int(off.get_height() *convY)) )
-
-    screen.blit( off, (0,0))
 
 
 def scale_image(image):
@@ -76,7 +67,6 @@ def main():
     font2 = pygame.font.Font(font2_name, int(22*convY))
     nom = None
     info = None
-    Inici = True
     help1 = font2.render("ONLINE HELP: E- Emulator , C - Computer , W - Emulator official site", 1, (187,17, 66))
     help2 = font2.render("F1 - HELP , O - Extra menu", 1, (187,17, 66))
     showinfo = False
@@ -85,14 +75,14 @@ def main():
     axisval = 0
     while True:
         event = None
-        if moving == 0 and Inici == False :
+        if moving == 0:
             event = pygame.event.wait()
      
             if (event.type == KEYDOWN and (event.key == K_q or event.key == K_ESCAPE)) or (event.type == QUIT) :
-                if event.key == K_q:
-                    drawimage( "On-Off.png" )
-                    pygame.display.update()
-                    time.sleep(1)
+                img = scale_image("On-Off.png")
+                screen.blit( img, (0,0))
+                pygame.display.update()
+                time.sleep(1)
                 sys.exit()
      
      
@@ -101,26 +91,15 @@ def main():
             
             if (event.type == KEYDOWN and (event.key == K_t))  :
                 sys.exit( 100 )
-     
+                
             if (event.type == KEYDOWN and (event.key == K_o))  :
                 sys.exit( 199 )
      
-            if event.type == KEYDOWN and (event.key == K_RETURN or event.key == K_1) :
+            if event.type == KEYDOWN and (event.key == K_RETURN) :
                 sys.exit( current + 2)
-     
-#            if event.type == KEYDOWN and event.key == K_2 :
-#                sys.exit( current + 2 + 50 )
-#     
-#            if event.type == KEYDOWN and event.key == K_3 :
-#                sys.exit( current + 2 + 70 )
-     
-            if event.type == JOYBUTTONDOWN :
-                sys.exit( current + 2)
-     
-     
+            
             if event.type == pygame.USEREVENT + 1:
                 showinfo = True
-     
      
             if moving == 0:
                 if (event.type == KEYDOWN and event.key == K_LEFT) :
@@ -129,14 +108,11 @@ def main():
                     pygame.time.set_timer(pygame.USEREVENT+2, 500)
                     gleft = True
      
-     
                 if (event.type == KEYDOWN and event.key == K_RIGHT) :
                     moving = -1
                     moving_start = pygame.time.get_ticks()
                     pygame.time.set_timer(pygame.USEREVENT+2, 500)
                     gright = True
-     
-     
      
             if (event.type == KEYUP and event.key == K_LEFT):
                 pygame.time.set_timer(pygame.USEREVENT+2, 0)
@@ -183,7 +159,6 @@ def main():
                 screen.blit( help1, ((screenX - (screenX/5) )- help1.get_width(), screenY - (135*convY)))
                 screen.blit( help2, ((screenX - (screenX/5) )- help2.get_width(), screenY - (935*convY)))
 
-
         pintaelement( items[current]["image"], offsetX )
         pintaelement( items[((current + 1) % nitems)]["image"], offsetX +screenX/2)
         pintaelement( items[((current - 1) % nitems)]["image"], offsetX -screenX/2)
@@ -199,19 +174,6 @@ def main():
         #        drawimage( "error/error"+ ( "%02d" % random.randrange( 1, 18) ) + ".png")
 
         pygame.display.update()
-
-        #if event:
-        #    if (event.type == pygame.USEREVENT) :
-        #        pygame.time.set_timer(pygame.USEREVENT, 1000*60)
-        #        pygame.time.set_timer(pygame.USEREVENT+1, 0)
-        #
-        #else:
-        #    pygame.time.set_timer(pygame.USEREVENT, 1000*60*10)
-        #    pygame.time.set_timer(pygame.USEREVENT+1, 1000*5)
-        #    showinfo = False
-        Inici = False
-
-
 
 
 if __name__ == "__main__":

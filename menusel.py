@@ -93,41 +93,39 @@ def prepareitems( pfilter ):
 
 
 prepareitems( "" )
-Inici = True
 
 while True:
 
-    if Inici == False :
-        event = pygame.event.wait()
-
-        if (event.type == KEYDOWN and event.key == K_ESCAPE) or (event.type == QUIT) :
-            sys.exit(-1)    
-
-        if event.type == KEYDOWN and event.key == K_RETURN :
-                print( items[current]["value"] )
-                sys.exit( 0 )
-
-        if (event.type == KEYDOWN and event.key == K_UP) :
-            current -= 1
-            current %= nitems
     
+    event = pygame.event.wait()
+
+    if (event.type == KEYDOWN and event.key == K_ESCAPE) or (event.type == QUIT) :
+        sys.exit(-1)    
+
+    if event.type == KEYDOWN and event.key == K_RETURN :
+            print( items[current]["value"] )
+            sys.exit( 0 )
+
+    if (event.type == KEYDOWN and event.key == K_UP) :
+        current -= 1
+        current %= nitems
         if (event.type == KEYDOWN and event.key == K_DOWN) :
-            current += 1
-            current %= nitems
+        current += 1
+        current %= nitems
 
-        if event.type == KEYDOWN:
-            nk = pygame.key.name( event.key )
-            if nk == "space":
-                nk = " " 
-            if nk in "abcdefghijklmnopqrstuvwxyz1234567890 ":
-                prepareitems( filter + nk.upper())
+    if event.type == KEYDOWN:
+        nk = pygame.key.name( event.key )
+        if nk == "space":
+            nk = " " 
+        if nk in "abcdefghijklmnopqrstuvwxyz1234567890 ":
+            prepareitems( filter + nk.upper())
 
 
-        if (event.type == KEYDOWN and event.key == K_DELETE) :
-            prepareitems( "" )
+    if (event.type == KEYDOWN and event.key == K_DELETE) :
+        prepareitems( "" )
 
-        if (event.type == KEYDOWN and event.key == K_BACKSPACE) :
-            prepareitems( filter[:-1] )
+    if (event.type == KEYDOWN and event.key == K_BACKSPACE) :
+        prepareitems( filter[:-1] )
 
     screen.fill((236,236,236))
 
@@ -147,7 +145,3 @@ while True:
     pintaelement( img_item, 425 , startpos - 30 )
 
     pygame.display.update()
-
-    Inici = False
-
-

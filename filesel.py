@@ -4,6 +4,7 @@
 import pygame, sys
 from pygame.locals import *
 
+import pygame
 import os
 import random
 import inspect
@@ -11,21 +12,32 @@ import glob
 
 execpath = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) # script directory
 
+pygame.init()
+pygame.mixer.init()
+pygame.font.init()
+
 
 pygame.key.set_repeat(300, 25)
 
 # init video
 pygame.mouse.set_visible( False )
 screen = pygame.display.set_mode((0,0), FULLSCREEN)
-#screen = pygame.display.set_mode((1920,1080))
 screenX = screen.get_width()
 screenY = screen.get_height()
 convX = float( screenX ) / float( 1920 )
 convY = float( screenY ) / float( 1080 )
+folder = sys.argv[3]
 
-img_folderico = pygame.image.load(execpath+"/extra/images/folder.png")
+img_folderico = pygame.image.load("./extra/images/folder.png")
 if convX != 1 or convY != 1:
-    img_folderico = pygame.transform.scale( folder, (int(img_folderico.get_width() * convX), int(img_folderico.get_height() *convY)) )
+    img_folderico = pygame.transform.scale( img_folderico, (int(img_folderico.get_width() * convX), int(img_folderico.get_height() *convY)) )
+    #img = pygame.transform.scale( img, (int(img.get_width() * convX), int(img.get_height() *convY)) )
+
+
+
+# load fonts
+font_name = "extra/ttf/Orbitron-Regular.ttf"
+font2_name = "extra/ttf/QuattrocentoSans-Regular.ttf"
 
 
 
@@ -64,7 +76,6 @@ selectmarge = 50
 selectleft = listleft-selectmarge
 selwidth = 700
 visibleitems = (limitpos - startpos) / itemh
-Inici = True
 
 items = []
 nitems = 0
@@ -130,71 +141,69 @@ loadfolder( folder )
 
 
 while True:
+    event = pygame.event.wait()
 
-    if Inici == False :
-        event = pygame.event.wait()
+    if (event.type == KEYDOWN and event.key == K_ESCAPE) or (event.type == QUIT) :
+        sys.exit(-1)    
 
-        if (event.type == KEYDOWN and event.key == K_ESCAPE) or (event.type == QUIT) :
-            sys.exit(-1)    
+    if event.type == KEYDOWN and event.key == K_RETURN :
+        cpos = current - offset
+        fname = items[cpos]["value"];
+        if os.path.isdir( fname ) :
+            loadfolder( fname )
+        else:
+            print( items[current]["value"] )
+            sys.exit( 0 )
 
-        if event.type == KEYDOWN and event.key == K_RETURN :
-            cpos = current - offset
-            fname = items[cpos]["value"];
-            if os.path.isdir( fname ) :
-                loadfolder( fname )
-            else:
-                print( items[current]["value"] )
-                sys.exit( 0 )
-
-        if (event.type == KEYDOWN and event.key == K_UP) :
-            current -= 1
-            if current < offset:
-                offset = current
+    if (event.type == KEYDOWN and event.key == K_UP) :
+        current -= 1
+        if current < offset:
+            offset = current
     
-        if (event.type == KEYDOWN and event.key == K_DOWN) :
-            current += 1
-            if current - offset >= visibleitems:
-                offset +=1
+    if (event.type == KEYDOWN and event.key == K_DOWN) :
+        current += 1
+        if current - offset >= visibleitems:
+            offset +=1
 
-        if (event.type == KEYDOWN and event.key == K_PAGEDOWN) :
-            current += visibleitems
-            offset += visibleitems
-            if current - offset >= visibleitems:
-                offset = current
+    if (event.type == KEYDOWN and event.key == K_PAGEDOWN) :
+        current += visibleitems
+        offset += visibleitems
+        if current - offset >= visibleitems:
+            offset = current
 
-        if (event.type == KEYDOWN and event.key == K_PAGEUP) :
-            current -= visibleitems
-            offset -= visibleitems
-            if current - offset >= visibleitems:
-                offset = current
-
-
-        if event.type == KEYDOWN:
-            nk = pygame.key.name( event.key )
-            if nk == "space":
-                nk = " " 
-            if nk in "abcdefghijklmnopqrstuvwxyz1234567890 .,;:-__?¿*!\"·$%&/()=":
-                prepareitems( filter + nk.upper())
+    if (event.type == KEYDOWN and event.key == K_PAGEUP) :
+        current -= visibleitems
+        offset -= visibleitems
+        if current - offset >= visibleitems:
+            offset = current
 
 
-        if (event.type == KEYDOWN and event.key == K_DELETE) :
-            prepareitems( "" )
+    if event.type == KEYDOWN:
+        nk = pygame.key.name( event.key )
+        if nk == "space":
+            nk = " " 
+        if nk in "abcdefghijklmnopqrstuvwxyz1234567890 .,;:-__?¿*!\"·$%&/()=":
+            prepareitems( filter + nk.upper())
 
-        if (event.type == KEYDOWN and event.key == K_BACKSPACE) :
-            prepareitems( filter[:-1] )
+
+    if (event.type == KEYDOWN and event.key == K_DELETE) :
+        prepareitems( "" )
+
+    if (event.type == KEYDOWN and event.key == K_BACKSPACE) :
+        prepareitems( filter[:-1] )
 
 
-        if (event.type == KEYDOWN and event.key == K_LEFT) :
-            dirname = os.path.dirname(currentfolder)
-            if dirname == "/":
-                dirname = ""
-            loadfolder( dirname )
+    if (event.type == KEYDOWN and event.key == K_LEFT) :
+        dirname = os.path.dirname(currentfolder)
+        if dirname == "/":
+            dirname = ""
+        loadfolder( dirname )
 
-        if (event.type == KEYDOWN and event.key == K_RIGHT) :
-            cpos = current - offset
-            fname = items[cpos]["value"];
-            if os.path.isdir( fname ) :
-                loadfolder( fname  )
+    if (event.type == KEYDOWN and event.key == K_RIGHT) :
+        cpos = current - offset
+        fname = items[cpos]["value"];
+        if os.path.isdir( fname ) :
+            loadfolder( fname  )
 
 
 
@@ -274,8 +283,7 @@ while True:
 
     pygame.display.update()
 
-    Inici = False
 
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()

@@ -73,10 +73,10 @@ _main ()
 		./atari800
 		_main ;;
 		19) 
-		/opt/selector/listfiles_sdl.sh "RETROARCH SNES " "/roms/snes/" "retroarch -L /opt/ra_cores/pocketsnes-libretro/libretro.so " "./extra/images/snes.png"
+		./listfiles_sdl.sh "RETROARCH SNES " "./roms/snes/" "retroarch -L /opt/ra_cores/pocketsnes-libretro/libretro.so " "./extra/images/snes.png"
 		_main ;;
 		20) 
-		/opt/selector/listfiles_sdl.sh "RETROARCH NES " "/roms/nes/" "retroarch -L /usr/lib/libretro-fceu.so " "./extra/images/nes.png"
+		./listfiles_sdl.sh "RETROARCH NES " "/roms/nes/" "retroarch -L /usr/lib/libretro-fceu.so " "./extra/images/nes.png"
 		_main ;;
 		21)	
 			/opt/selector/listfiles_sdl.sh "GNUBOY " "/roms/gameboy/" "/opt/gnuboy-1.0.3.orig/sdlgnuboy --scale=4 " "./extra/images/gameboy.png"
