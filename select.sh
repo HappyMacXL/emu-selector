@@ -120,11 +120,6 @@ _main ()
 		_main ;;
 
 
-		100) 
-		cd
-		/bin/bash
-		exit ;;
-
 #v0.3
 		199) 
 		cd ./tools
