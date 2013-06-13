@@ -15,13 +15,11 @@ execpath = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe(
 pygame.init()
 pygame.mixer.init()
 pygame.font.init()
-
-
 pygame.key.set_repeat(300, 25)
-
-# init video
 pygame.mouse.set_visible( False )
-screen = pygame.display.set_mode((0,0), FULLSCREEN)
+# init video
+#screen = pygame.display.set_mode((0,0), FULLSCREEN)
+screen = pygame.display.set_mode((0,0))
 screenX = screen.get_width()
 screenY = screen.get_height()
 convX = float( screenX ) / float( 1920 )
@@ -31,41 +29,23 @@ folder = sys.argv[3]
 img_folderico = pygame.image.load("./extra/images/folder.png")
 if convX != 1 or convY != 1:
     img_folderico = pygame.transform.scale( img_folderico, (int(img_folderico.get_width() * convX), int(img_folderico.get_height() *convY)) )
-    #img = pygame.transform.scale( img, (int(img.get_width() * convX), int(img.get_height() *convY)) )
-
 
 
 # load fonts
 font_name = "extra/ttf/Orbitron-Regular.ttf"
 font2_name = "extra/ttf/QuattrocentoSans-Regular.ttf"
-
-
-
-
-font_titol = pygame.font.Font(font_name, int(48*convY))
-font_subtitol = pygame.font.Font(font_name, int(28*convY))
+font_title = pygame.font.Font(font_name, int(48*convY))
+font_subtitle = pygame.font.Font(font_name, int(28*convY))
 font_item = pygame.font.Font(font2_name, int(26*convY))
 font_itemsel = pygame.font.Font(font2_name, int(20*convY))
 
 
 # load menu items
 pitems = []
-titol = sys.argv[1]
-subtitol = sys.argv[2]
-folder = sys.argv[3]
+title = sys.argv[1] # "CHAMELEONPI"
+subtitle = sys.argv[2] # "Retroarch MAME"
+folder = sys.argv[3] # "/dades2/jocs/spectrum"
 
-img_icon = None
-
-if len(sys.argv) > 4:
-    if sys.argv[4] != "":
-        img_icon = pygame.image.load(sys.argv[4])
-        w = 500
-        h = w / float(img_icon.get_width()) * float(img_icon.get_height())
-        img_icon = pygame.transform.scale( img_icon, (int(w * convX), int(h *convY)) )
-
-#titol = "CHAMELEONPI"
-#subtitol = "Retroarch MAME"
-#folder = "/dades2/jocs/spectrum"
 
 
 startpos = 250
@@ -82,13 +62,11 @@ nitems = 0
 
 filter = ""
 
-img_titol = font_titol.render(titol, 1, (50,50, 50))
-img_subtitol = font_subtitol.render(subtitol, 1, (50,50, 50))
+img_title = font_title.render(title, 1, (50,50, 50))
+img_subtitle = font_subtitle.render(subtitle, 1, (50,50, 50))
 
 def prepareitems( pfilter, force = False ):
-
     global items, nitems, current, pitems, filter, offset
-
     titems = []
 
     for item in pitems:
@@ -104,14 +82,10 @@ def prepareitems( pfilter, force = False ):
 
 def loadfolder( folder ):
     global currentfolder, pitems, current, offset, img_folder
-
     pitems = []
-
     currentfolder = folder
 
-
     for file in glob.glob(currentfolder+"/*"):
-
         try:
             filen = file.decode('utf-8')
         except Exception: 
@@ -121,22 +95,23 @@ def loadfolder( folder ):
         
         pitems.append ( {"value":filen, "name":os.path.basename(filen)} )
     pitems.sort()
-
     current = 0
     offset = 0
-
-    img_folder = font_subtitol.render(currentfolder, 1, (187,17,66))
-
+    img_folder = font_subtitle.render(currentfolder, 1, (187,17,66))
     prepareitems( "", True )
 
 
-folder
 def pintaelement( imatge, px, py, mw = 0  ):
     mw *= convX
     screen.blit( imatge, (px*convX, py*convY), (0, 0, mw if mw != 0 else imatge.get_width(), imatge.get_height()) );
 
 
 loadfolder( folder )
+
+img_icon = pygame.image.load(sys.argv[4])
+w = 500
+h = w / float(img_icon.get_width()) * float(img_icon.get_height())
+img_icon = pygame.transform.scale( img_icon, (int(w * convX), int(h *convY)) )
 
 
 
@@ -223,8 +198,8 @@ while True:
 
     screen.fill((236,236,236))
 
-    pintaelement( img_titol, 225, 146 )
-    pintaelement( img_subtitol, 225, 200 )
+    pintaelement( img_title, 225, 146 )
+#    pintaelement( img_subtitle, 225, 200 )
     pintaelement( img_folder, 900, 146 )
 
     cpos = current - offset
@@ -251,10 +226,6 @@ while True:
         
         pospaint += 1
 
-
-    #   if startpos + (itemh * pospaint) >= limitpos:
-    #       break
-
     img_item = font_itemsel.render(filter, 1, (187,17,66))
     pintaelement( img_item, listleft, startpos - 30 )
 
@@ -276,14 +247,5 @@ while True:
         npos = startpos
 
     pygame.draw.circle ( screen, (180, 180, 180), (int( (listleft+selwidth+4) * convX), int(npos * convY)), 10)
-
-
-    if img_icon != None:
-        pintaelement( img_icon, 225, 400 )
-
+    pintaelement( img_icon, 225, 400 )
     pygame.display.update()
-
-
-
-#if __name__ == "__main__":
-#    main()

@@ -11,14 +11,14 @@ import time
 pygame.init()
 pygame.mixer.init()
 pygame.font.init()
+pygame.key.set_repeat(300, 25)
 
 font_name = "extra/ttf/Orbitron-Regular.ttf"
 font2_name = "extra/ttf/QuattrocentoSans-Regular.ttf"
 tada = pygame.mixer.Sound("extra/sounds/ultimate.ogg")
-screenX = 1920
-screenY = 1080
 pygame.mouse.set_visible( False )
 screen = pygame.display.set_mode((0,0))
+#screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN|pygame.DOUBLEBUF|pygame.HWSURFACE)
 screenX = screen.get_width()
 screenY = screen.get_height()
 convX = float( screenX ) / float( 1920 )
@@ -33,7 +33,7 @@ def scale_image(image):
     return img
 
 
-def pintaelement( image , px ):
+def paintelement( image , px ):
     dy = (-100 * convY ) + screenY/2 - image.get_height() / 2
     dx = screenX/2- image.get_width()/2+px
     screen.blit( image, (dx, dy) );
@@ -64,11 +64,7 @@ def main():
     nitems = len( items)
     font = pygame.font.Font(font_name, int(100*convY))
     font2 = pygame.font.Font(font2_name, int(22*convY))
-    nom = None
-    info = None
-    help1 = font2.render("ONLINE HELP: E- Emulator , C - Computer , W - Emulator official site", 1, (187,17, 66))
     help2 = font2.render("F1 - HELP , O - Extra menu", 1, (187,17, 66))
-    showinfo = False
     axisval = 0
     while True:
         event = None
@@ -89,9 +85,6 @@ def main():
             if event.type == KEYDOWN and (event.key == K_RETURN) :
                 sys.exit( current + 2)
 
-            if event.type == pygame.USEREVENT + 1:
-                showinfo = True
-
             if moving == 0:
                 if (event.type == KEYDOWN and (event.key == K_LEFT or event.key == K_RIGHT)):
                     moving = 1 if (event.key == K_LEFT) else -1
@@ -105,38 +98,23 @@ def main():
                 current = current  - moving
                 current %= nitems
                 moving = 0
-                nom = None
-                info = None
             else:
                 offsetX = moving_dist * moving_time / moving_duration * moving
 
-        screen.fill((230,230,230))
+#        screen.fill((230,230,230))
         screen.blit( ft, (0,0))
 
-        if( nom == None):
-            nom = font.render(items[current]["nom"], 1, (60,60, 60))
-
-
-        if( info == None):
-            info = font2.render(items[current]["info"], 1, (187,17, 66))
+        nom = font.render(items[current]["nom"], 1, (60,60, 60))
 
         if moving == 0:
             screen.blit( nom, (screenX/2 - nom.get_width()/2, screenY - (330*convY)))
+            screen.blit( help2, ((screenX - (screenX/5) )- help2.get_width(), screenY - (935*convY)))
 
-            if showinfo:
-                screen.blit( info, ((screenX - (screenX/5))- info.get_width(), screenY - (165*convY)))
-                screen.blit( help1, ((screenX - (screenX/5) )- help1.get_width(), screenY - (135*convY)))
-                screen.blit( help2, ((screenX - (screenX/5) )- help2.get_width(), screenY - (935*convY)))
+        paintelement( items[current]["image"], offsetX )
+        paintelement( items[((current + 1) % nitems)]["image"], offsetX +screenX/2)
+        paintelement( items[((current - 1) % nitems)]["image"], offsetX -screenX/2)
 
-        pintaelement( items[current]["image"], offsetX )
-        pintaelement( items[((current + 1) % nitems)]["image"], offsetX +screenX/2)
-        pintaelement( items[((current - 1) % nitems)]["image"], offsetX -screenX/2)
-
-        pintaelement( items[((current + moving*2) % nitems)]["image"], screenX*moving)
-
-        #if event:
-        #    if (event.type == pygame.USEREVENT)  :
-        #        drawimage( "error/error"+ ( "%02d" % random.randrange( 1, 18) ) + ".png")
+        paintelement( items[((current + moving*2) % nitems)]["image"], screenX*moving)
 
         pygame.display.update()
         #print " moving: %s\n moving_count: %s\n moving_start: %s\n moving_duration: %s\n offsetX: %s\n moving_dist: %s\n current: %s\n axisval: %s\n userevernt: %s\n" %(moving,moving_count,moving_start, moving_duration,offsetX, moving_dist, current,axisval,pygame.USEREVENT)
