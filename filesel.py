@@ -1,11 +1,10 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*- 
-
+# ./filesel.py "TITLE" "./roms/snes/" './extra/images/snes.png'
 import pygame, sys
+import os
 from pygame.locals import *
 
-import pygame
-import os
 import random
 import inspect
 import glob
@@ -24,7 +23,8 @@ screenX = screen.get_width()
 screenY = screen.get_height()
 convX = float( screenX ) / float( 1920 )
 convY = float( screenY ) / float( 1080 )
-folder = sys.argv[3]
+folder = sys.argv[2]
+original_folder = folder
 
 img_folderico = pygame.image.load("./extra/images/folder.png")
 if convX != 1 or convY != 1:
@@ -43,9 +43,8 @@ font_itemsel = pygame.font.Font(font2_name, int(20*convY))
 # load menu items
 pitems = []
 title = sys.argv[1] # "CHAMELEONPI"
-subtitle = sys.argv[2] # "Retroarch MAME"
-folder = sys.argv[3] # "/dades2/jocs/spectrum"
-
+#subtitle = sys.argv[2] # "Retroarch MAME"
+folder = sys.argv[2] # "/dades2/jocs/spectrum"
 
 
 startpos = 250
@@ -63,7 +62,7 @@ nitems = 0
 filter = ""
 
 img_title = font_title.render(title, 1, (50,50, 50))
-img_subtitle = font_subtitle.render(subtitle, 1, (50,50, 50))
+#img_subtitle = font_subtitle.render(subtitle, 1, (50,50, 50))
 
 def prepareitems( pfilter, force = False ):
     global items, nitems, current, pitems, filter, offset
@@ -108,7 +107,7 @@ def pintaelement( imatge, px, py, mw = 0  ):
 
 loadfolder( folder )
 
-img_icon = pygame.image.load(sys.argv[4])
+img_icon = pygame.image.load("extra/images/"+sys.argv[3])
 w = 500
 h = w / float(img_icon.get_width()) * float(img_icon.get_height())
 img_icon = pygame.transform.scale( img_icon, (int(w * convX), int(h *convY)) )
@@ -169,10 +168,13 @@ while True:
 
 
     if (event.type == KEYDOWN and event.key == K_LEFT) :
-        dirname = os.path.dirname(currentfolder)
-        if dirname == "/":
-            dirname = ""
-        loadfolder( dirname )
+        print original_folder, currentfolder
+        #TODO: don't let go to other folders
+        if currentfolder != original_folder:
+            dirname = os.path.dirname(currentfolder)
+            if dirname == "/":
+                dirname = ""
+            loadfolder( dirname )
 
     if (event.type == KEYDOWN and event.key == K_RIGHT) :
         cpos = current - offset

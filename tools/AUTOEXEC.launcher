@@ -1,7 +1,0 @@
-cd /opt/selector/tools
-sudo ./usbmount.sh > /dev/null 2>&1
-
-cd /roms
-sh AUTOEXEC.launcher
-
-

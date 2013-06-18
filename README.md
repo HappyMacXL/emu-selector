@@ -1,4 +1,4 @@
 emu-selector
 ============
 
-ChameleonPi emulator selector
+Fork from ChameleonPi emulator selector (http://chameleon.enging.com/).

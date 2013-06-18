@@ -1,5 +1,5 @@
-To do list
-**********
+TODO
+====
 * Finish the first approach to launcher
     * Make the file selector be integrated
     * Make sure it's working

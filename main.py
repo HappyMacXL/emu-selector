@@ -8,6 +8,7 @@ from pygame.locals import *
 import random
 #import library
 import time
+import subprocess
 
 pygame.init()
 pygame.mixer.init()
@@ -47,13 +48,12 @@ def get_machines():
     for s in c.sections():
         if s != "config":
             items = dict(c.items(s))
-            items["image"] = scale_image(items["image"])
+            items["picture"] = scale_image(items["image"])
             machines.append(items)
     return machines,dict(c.items("config"))
 
 def main():
     items,config = get_machines()
-    #items = get_machines()
     tada.play()
     ft = scale_image("fonstram.png")
     moving = 0
@@ -68,32 +68,37 @@ def main():
     font2 = pygame.font.Font(font2_name, int(22*convY))
     help2 = font2.render("F1 - HELP , O - Extra menu", 1, (187,17, 66))
     axisval = 0
-    print items
+    #print items
     while True:
         event = None
         if moving == 0:
             event = pygame.event.wait()
             #print " event: %s\n" %event
-        
+
             if (event.type == KEYDOWN and (event.key == K_q or event.key == K_ESCAPE)) or (event.type == QUIT) :
                 img = scale_image("On-Off.png")
                 screen.blit( img, (0,0))
                 pygame.display.update()
                 time.sleep(1)
                 sys.exit()
-        
+
             if (event.type == KEYDOWN and (event.key == K_o))  :
                 sys.exit( 199 )
-        
+
             if event.type == KEYDOWN and (event.key == K_RETURN) :
-                sys.exit( current + 2)
-        
+                print items[current]["name"], items[current]["roms"], items[current]["image"]
+                ## ./filesel.py "TITLE" "./roms/snes/" './extra/images/snes.png'
+                file = subprocess.call(['./filesel.py',items[current]["name"], items[current]["roms"], items[current]["image"]])
+                #TODO: call subprocess to execute the emulator with rom :D
+                print file
+                #sys.exit( current + 2)
+
             if moving == 0:
                 if (event.type == KEYDOWN and (event.key == K_LEFT or event.key == K_RIGHT)):
                     moving = 1 if (event.key == K_LEFT) else -1
                     moving_start = pygame.time.get_ticks()
                     pygame.time.set_timer(pygame.USEREVENT+2, 500)
-        
+
         if moving != 0:
             moving_time = pygame.time.get_ticks()    - moving_start
             if moving_time >= moving_duration:
@@ -113,15 +118,14 @@ def main():
             screen.blit( nom, (screenX/2 - nom.get_width()/2, screenY - (330*convY)))
             screen.blit( help2, ((screenX - (screenX/5) )- help2.get_width(), screenY - (935*convY)))
 
-        paintelement( items[current]["image"], offsetX )
-        paintelement( items[((current + 1) % nitems)]["image"], offsetX +screenX/2)
-        paintelement( items[((current - 1) % nitems)]["image"], offsetX -screenX/2)
-        
+        paintelement( items[current]["picture"], offsetX )
+        paintelement( items[((current + 1) % nitems)]["picture"], offsetX +screenX/2)
+        paintelement( items[((current - 1) % nitems)]["picture"], offsetX -screenX/2)
+
         #paintelement( items[((current + moving*2) % nitems)]["image"], screenX*moving)
-        
+
         pygame.display.update()
-
-
+        #print " moving: %s\n moving_count: %s\n moving_start: %s\n moving_duration: %s\n offsetX: %s\n moving_dist: %s\n current: %s\n axisval: %s\n userevernt: %s\n" %(moving,moving_count,moving_start, moving_duration,offsetX, moving_dist, current,axisval,pygame.USEREVENT)
 
 
 if __name__ == "__main__":
