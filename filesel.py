@@ -122,12 +122,14 @@ while True:
 
     if event.type == KEYDOWN and event.key == K_RETURN :
         cpos = current - offset
-        fname = items[cpos]["value"];
-        if os.path.isdir( fname ) :
-            loadfolder( fname )
-        else:
-            print( items[current]["value"] )
-            sys.exit( 0 )
+        #don't crash when the directory is empty
+        if current != -1 :
+            fname = items[cpos]["value"];
+            if os.path.isdir( fname ) :
+                loadfolder( fname )
+            else:
+                print( items[current]["value"] )
+                sys.exit( 0 )
 
     if (event.type == KEYDOWN and event.key == K_UP) :
         current -= 1
@@ -178,9 +180,11 @@ while True:
 
     if (event.type == KEYDOWN and event.key == K_RIGHT) :
         cpos = current - offset
-        fname = items[cpos]["value"];
-        if os.path.isdir( fname ) :
-            loadfolder( fname  )
+        #don't crash when the directory is empty
+        if current != -1 :
+            fname = items[cpos]["value"];
+            if os.path.isdir( fname ) :
+                loadfolder( fname  )
 
 
 
