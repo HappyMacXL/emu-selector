@@ -15,47 +15,49 @@ pygame.mixer.init()
 pygame.font.init()
 pygame.key.set_repeat(300, 25)
 
-font_name = "extra/ttf/Orbitron-Regular.ttf"
-font2_name = "extra/ttf/QuattrocentoSans-Regular.ttf"
-tada = pygame.mixer.Sound("extra/sounds/ultimate.ogg")
-pygame.mouse.set_visible( False )
 screen = pygame.display.set_mode((0,0))
 #screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN|pygame.DOUBLEBUF|pygame.HWSURFACE)
-screenX = screen.get_width()
-screenY = screen.get_height()
-convX = float( screenX ) / float( 1920 )
-convY = float( screenY ) / float( 1080 )
 #print screenX,screenY,convX,convY
 
 
-def scale_image(image):
+def scale_image(image, convX, convY):
     img = pygame.image.load("extra/images/"+image).convert_alpha()
     if convX != 1 or convY != 1:
         img = pygame.transform.scale( img, (int(img.get_width() * convX), int(img.get_height() *convY)) )
     return img
 
 
-def paintelement( image , px ):
+def paintelement( image , px, screenX, screenY, convY ):
     dy = (-100 * convY ) + screenY/2 - image.get_height() / 2
     dx = screenX/2- image.get_width()/2+px
     screen.blit( image, (dx, dy) )
 
 
-def get_machines():
+def get_machines(convX,convY):
     c = ConfigParser.ConfigParser()
     c.readfp(open("config.cfg"))
     machines = []
     for s in c.sections():
         if s != "config":
             items = dict(c.items(s))
-            items["picture"] = scale_image(items["image"])
+            items["picture"] = scale_image(items["image"],convX,convY)
             machines.append(items)
     return machines,dict(c.items("config"))
 
 def main():
-    items,config = get_machines()
+    font_name = "extra/ttf/Orbitron-Regular.ttf"
+    font2_name = "extra/ttf/QuattrocentoSans-Regular.ttf"
+    tada = pygame.mixer.Sound("extra/sounds/ultimate.ogg")
+    pygame.mouse.set_visible( False )
+
+    screenX = screen.get_width()
+    screenY = screen.get_height()
+    convX = float( screenX ) / float( 1920 )
+    convY = float( screenY ) / float( 1080 )
+
+    items,config = get_machines(convX,convY)
     tada.play()
-    ft = scale_image("fonstram.png")
+    ft = scale_image("fonstram.png",convX,convY)
     moving = 0
     moving_count =0
     moving_start = 0
@@ -76,7 +78,7 @@ def main():
             #print " event: %s\n" %event
 
             if (event.type == KEYDOWN and (event.key == K_q or event.key == K_ESCAPE)) or (event.type == QUIT) :
-                img = scale_image("On-Off.png")
+                img = scale_image("On-Off.png",convX,convY)
                 screen.blit( img, (0,0))
                 pygame.display.update()
                 time.sleep(1)
@@ -118,9 +120,9 @@ def main():
             screen.blit( nom, (screenX/2 - nom.get_width()/2, screenY - (330*convY)))
             screen.blit( help2, ((screenX - (screenX/5) )- help2.get_width(), screenY - (935*convY)))
 
-        paintelement( items[current]["picture"], offsetX )
-        paintelement( items[((current + 1) % nitems)]["picture"], offsetX +screenX/2)
-        paintelement( items[((current - 1) % nitems)]["picture"], offsetX -screenX/2)
+        paintelement( items[current]["picture"], offsetX, screenX, screenY, convY )
+        paintelement( items[((current + 1) % nitems)]["picture"], offsetX +screenX/2, screenX, screenY, convY)
+        paintelement( items[((current - 1) % nitems)]["picture"], offsetX -screenX/2, screenX, screenY, convY)
 
         #paintelement( items[((current + moving*2) % nitems)]["image"], screenX*moving)
 
