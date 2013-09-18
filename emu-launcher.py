@@ -13,6 +13,20 @@ import subprocess
 import inspect
 import glob
 
+def paint_window():
+    pygame.init()
+    pygame.mixer.init()
+    pygame.font.init()
+    pygame.key.set_repeat(300, 25)
+    pygame.mouse.set_visible( False )
+    screen = pygame.display.set_mode((0,0), FULLSCREEN)
+    #screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN|pygame.DOUBLEBUF|pygame.HWSURFACE)
+    screen = pygame.display.set_mode((0,0))
+    screenX = screen.get_width()
+    screenY = screen.get_height()
+    convX = float( screenX ) / float( 1920 )
+    convY = float( screenY ) / float( 1080 )
+
 pygame.init()
 pygame.mixer.init()
 pygame.font.init()
@@ -41,12 +55,9 @@ help2 = font2.render("F1 - HELP , O - Extra menu", 1, (187,17, 66))
 ##filesel.py
 # load menu items
 pitems = []
-#title = sys.argv[1] # "CHAMELEONPI"
-#subtitle = sys.argv[2] # "Retroarch MAME"
-#folder = sys.argv[2] # "/dades2/jocs/spectrum"
 title =  "CHAMELEONPI"
-subtitle =  "Retroarch MAME"
-folder = "/dades2/jocs/spectrum"
+subtitle =  "MAME"
+folder = "/home/roms"
 
 startpos = 250
 itemh = 40
@@ -64,6 +75,7 @@ if convX != 1 or convY != 1:
     img_folderico = pygame.transform.scale( img_folderico, (int(img_folderico.get_width() * convX), int(img_folderico.get_height() *convY)) )
 img_title = font_title.render(title, 1, (50,50, 50))
 img_subtitle = font_subtitle.render(subtitle, 1, (50,50, 50))
+
 
 
 
@@ -119,9 +131,9 @@ def loadfolder( folder ):
     for file in glob.glob(currentfolder+"/*"):
         try:
             filen = file.decode('utf-8')
-        except Exception: 
+        except Exception:
             filen = file
-            print file
+            #print file
             pass
         pitems.append ( {"value":filen, "name":os.path.basename(filen)} )
     pitems.sort()
@@ -131,177 +143,145 @@ def loadfolder( folder ):
     prepareitems( "", True )
 
 
-def filesel(title, folder,machine_img):
+def filesel(title, folder, machine_img):
+    original_folder = folder
     loadfolder( folder )
+    current = 0
+    offset = 0
 
-    pygame.init()
-    pygame.mixer.init()
-    pygame.font.init()
-    pygame.key.set_repeat(300, 25)
-    pygame.mouse.set_visible( False )
-    screen = pygame.display.set_mode((0,0), FULLSCREEN)
-    screen = pygame.display.set_mode((0,0))
-    screenX = screen.get_width()
-    screenY = screen.get_height()
-    convX = float( screenX ) / float( 1920 )
-    convY = float( screenY ) / float( 1080 )
-    
+    paint_window()
+
     img_icon = pygame.image.load("extra/images/"+machine_img)
     w = 500
     h = w / float(img_icon.get_width()) * float(img_icon.get_height())
     img_icon = pygame.transform.scale( img_icon, (int(w * convX), int(h *convY)) )
-    
-    
-    
+
     while True:
         event = pygame.event.wait()
-    
-        if (event.type == KEYDOWN and event.key == K_ESCAPE) or (event.type == QUIT) :
-            sys.exit(-1)    
-    
-        if event.type == KEYDOWN and event.key == K_RETURN :
+
+        if (event.type == KEYDOWN and event.key == K_ESCAPE) or (event.type == QUIT):
+            return
+
+        if event.type == KEYDOWN and event.key == K_RETURN:
             cpos = current - offset
             #don't crash when the directory is empty
-            if current != -1 :
+            if current != -1:
                 fname = items2[cpos]["value"];
-                if os.path.isdir( fname ) :
+                if os.path.isdir( fname ):
                     loadfolder( fname )
                 else:
-                    print( items2[current]["value"] )
-                    sys.exit( 0 )
-    
-        if (event.type == KEYDOWN and event.key == K_UP) :
+                    return items2[current]["value"]
+
+        if (event.type == KEYDOWN and event.key == K_UP):
             current -= 1
             if current < offset:
                 offset = current
-    
-        if (event.type == KEYDOWN and event.key == K_DOWN) :
+
+        if (event.type == KEYDOWN and event.key == K_DOWN):
             current += 1
             if current - offset >= visibleitems:
                 offset +=1
-    
-        if (event.type == KEYDOWN and event.key == K_PAGEDOWN) :
-            current += visibleitems
-            offset += visibleitems
+
+        if (event.type == KEYDOWN and (event.key == K_PAGEDOWN or event.key == K_PAGEUP)):
+            if event.key == K_PAGEUP:
+                current -= visibleitems
+                offset -= visibleitems
+            else:
+                current += visibleitems
+                offset += visibleitems
             if current - offset >= visibleitems:
                 offset = current
-    
-        if (event.type == KEYDOWN and event.key == K_PAGEUP) :
-            current -= visibleitems
-            offset -= visibleitems
-            if current - offset >= visibleitems:
-                offset = current
-    
-    
+
         if event.type == KEYDOWN:
             nk = pygame.key.name( event.key )
             if nk == "space":
                 nk = " "
             if nk in "abcdefghijklmnopqrstuvwxyz1234567890 .,;:-__?¿*!\"·$%&/()=":
                 prepareitems( filter + nk.upper())
-    
-    
-        if (event.type == KEYDOWN and event.key == K_DELETE) :
+
+        if (event.type == KEYDOWN and event.key == K_DELETE):
             prepareitems( "" )
-    
-        if (event.type == KEYDOWN and event.key == K_BACKSPACE) :
+
+        if (event.type == KEYDOWN and event.key == K_BACKSPACE):
             prepareitems( filter[:-1] )
-    
-        if (event.type == KEYDOWN and event.key == K_LEFT) :
-            print original_folder, currentfolder
-            #TODO: don't let go to other folders
+
+        if (event.type == KEYDOWN and event.key == K_LEFT):
             if currentfolder != original_folder:
                 dirname = os.path.dirname(currentfolder)
                 if dirname == "/":
                     dirname = ""
                 loadfolder( dirname )
-    
-        if (event.type == KEYDOWN and event.key == K_RIGHT) :
+
+        if (event.type == KEYDOWN and event.key == K_RIGHT):
             cpos = current - offset
             #don't crash when the directory is empty
-            if current != -1 :
+            if current != -1:
                 fname = items2[cpos]["value"];
-                if os.path.isdir( fname ) :
+                if os.path.isdir( fname ):
                     loadfolder( fname  )
-    
-    
-    
         if current < 0:
             current = 0
         if current >= nitems2:
             current = nitems2-1
-    
+
         if (current < offset) or (current >= offset+visibleitems):
             offset = current
-    
+
         if offset >= nitems2 - visibleitems:
             offset = nitems2 - visibleitems
         if offset < 0:
             offset = 0
-    
-    
+
         screen.fill((236,236,236))
-    
+
         pintaelement( img_title, 225, 146 )
-    #    pintaelement( img_subtitle, 225, 200 )
         pintaelement( img_folder, 900, 146 )
         cpos = current - offset
         rectsel = pygame.Rect( selectleft*convX, (startpos+cpos*itemh-3) * convY, selwidth*convX, itemh*convY-2 )
         screen.fill((187,17,66), rectsel )
-    
+
         pospaint=0
-    
-        for compta in range(0, min(visibleitems, nitems2 )) :
+
+        for compta in range(0, min(visibleitems, nitems2 )):
             item = items2[compta+offset]
             leftpad = 0
-    
-            if os.path.isdir( item["value"] ) :
+
+            if os.path.isdir( item["value"] ):
                 pintaelement( img_folderico, listleft , startpos + (itemh * pospaint)+4 )
                 leftpad = 50
-    
+
             img_item = font_item.render(item["name"], 1, (50,50,50) if pospaint != cpos else (255,255,255))
             pintaelement( img_item, listleft+leftpad, startpos + (itemh * pospaint), selwidth-selectmarge*2)
-    
+
             if( img_item.get_width() >= selwidth-selectmarge*2 ):
-    
+
                 img_item = font_item.render("...", 1, (50,50,50) if pospaint != cpos else (255,255,255))
                 pintaelement( img_item, listleft+selwidth-selectmarge*2, startpos + (itemh * pospaint) )
-            
+
             pospaint += 1
-    
+
         img_item = font_itemsel.render(filter, 1, (187,17,66))
         pintaelement( img_item, listleft, startpos - 30 )
-    
+
         img_item = font_itemsel.render("...", 1, (187,17,66))
-    
+
         if offset+visibleitems < nitems2:
             pintaelement( img_item, selectleft ,  limitpos )
-    
+
         if offset > 1:
             pintaelement( img_item, selectleft,  startpos - 30 )
-    
+
         rectsel = pygame.Rect( (listleft+selwidth) * convX, startpos * convY, 8*convX, (limitpos-startpos)*convY )
         screen.fill((220,220,220), rectsel )
-    
+
         if float(nitems2-1) > 0:
             npos = startpos+float(current) * float(limitpos-startpos) / float(nitems2-1)
         else:
             npos = startpos
-    
+
         pygame.draw.circle ( screen, (180, 180, 180), (int( (listleft+selwidth+4) * convX), int(npos * convY)), 10)
         pintaelement( img_icon, 225, 400 )
         pygame.display.update()
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -309,52 +289,38 @@ def main():
     tada = pygame.mixer.Sound("extra/sounds/ultimate.ogg")
     pygame.mouse.set_visible( False )
 
-
     items,config = get_machines(convX,convY)
     tada.play()
     ft = scale_image("fonstram.png",convX,convY)
-    moving = 0
-    moving_count =0
-    moving_start = 0
+    moving = moving_count = moving_start = offsetX = current = 0
     moving_duration = 180
-    offsetX = 0
     moving_dist = screenX / 2
-    current = 0
     nitems = len( items)
-    axisval = 0
-    #print items
     while True:
         event = None
         if moving == 0:
             event = pygame.event.wait()
-            #print " event: %s\n" %event
 
-            if (event.type == KEYDOWN and (event.key == K_q or event.key == K_ESCAPE)) or (event.type == QUIT) :
+            if (event.type == KEYDOWN and (event.key == K_q or event.key == K_ESCAPE)) or (event.type == QUIT):
                 img = scale_image("On-Off.png",convX,convY)
                 screen.blit( img, (0,0))
                 pygame.display.update()
-                time.sleep(1)
                 sys.exit()
 
-            if (event.type == KEYDOWN and (event.key == K_o))  :
+            if (event.type == KEYDOWN and (event.key == K_o)):
                 sys.exit( 199 )
 
-            if event.type == KEYDOWN and (event.key == K_RETURN) :
+            if event.type == KEYDOWN and (event.key == K_RETURN):
                 print items[current]["name"], items[current]["roms"], items[current]["image"]
-                ## ./filesel.py "TITLE" "./roms/snes/" './extra/images/snes.png'
-                #file = subprocess.call(['./filesel.py',items[current]["name"], items[current]["roms"], items[current]["image"]])
                 file = filesel(items[current]["name"], items[current]["roms"], items[current]["image"])
-                #print items[current]["name"], items[current]["roms"], items[current]["image"]
-                #exit
-                #TODO: call subprocess to execute the emulator with rom :D
-                print file
-                #sys.exit( current + 2)
+                if file != None:
+                    #TODO: call subprocess to execute the emulator with rom :D
+                    print "JUGANDO!"
 
-            if moving == 0:
-                if (event.type == KEYDOWN and (event.key == K_LEFT or event.key == K_RIGHT)):
-                    moving = 1 if (event.key == K_LEFT) else -1
-                    moving_start = pygame.time.get_ticks()
-                    pygame.time.set_timer(pygame.USEREVENT+2, 500)
+            if (event.type == KEYDOWN and (event.key == K_LEFT or event.key == K_RIGHT)):
+                moving = 1 if (event.key == K_LEFT) else -1
+                moving_start = pygame.time.get_ticks()
+                pygame.time.set_timer(pygame.USEREVENT+2, 500)
 
         if moving != 0:
             moving_time = pygame.time.get_ticks()    - moving_start
@@ -379,10 +345,7 @@ def main():
         paintelement( items[((current + 1) % nitems)]["picture"], offsetX +screenX/2, screenX, screenY, convY)
         paintelement( items[((current - 1) % nitems)]["picture"], offsetX -screenX/2, screenX, screenY, convY)
 
-        #paintelement( items[((current + moving*2) % nitems)]["image"], screenX*moving)
-
         pygame.display.update()
-        #print " moving: %s\n moving_count: %s\n moving_start: %s\n moving_duration: %s\n offsetX: %s\n moving_dist: %s\n current: %s\n axisval: %s\n userevernt: %s\n" %(moving,moving_count,moving_start, moving_duration,offsetX, moving_dist, current,axisval,pygame.USEREVENT)
 
 
 if __name__ == "__main__":
