@@ -13,44 +13,30 @@ import subprocess
 import inspect
 import glob
 
-def paint_window():
-    pygame.init()
-    pygame.mixer.init()
-    pygame.font.init()
-    pygame.key.set_repeat(300, 25)
-    pygame.mouse.set_visible( False )
-    screen = pygame.display.set_mode((0,0), FULLSCREEN)
-    #screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN|pygame.DOUBLEBUF|pygame.HWSURFACE)
-    screen = pygame.display.set_mode((0,0))
-    screenX = screen.get_width()
-    screenY = screen.get_height()
-    convX = float( screenX ) / float( 1920 )
-    convY = float( screenY ) / float( 1080 )
-
 pygame.init()
 pygame.mixer.init()
 pygame.font.init()
 pygame.key.set_repeat(300, 25)
-pygame.mouse.set_visible(False)
+#pygame.mouse.set_visible(False)
 
-screen = pygame.display.set_mode((0,0))
-#screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN|pygame.DOUBLEBUF|pygame.HWSURFACE)
-#print screenX,screenY,convX,convY
+screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN|pygame.HWACCEL|pygame.HWSURFACE)
 screenX = screen.get_width()
 screenY = screen.get_height()
-convX = float( screenX ) / float( 1920 )
-convY = float( screenY ) / float( 1080 )
+convX = float( screenX ) / float(1920)
+convY = float( screenY ) / float(1080)
 
+font_color = (50,50,50)
+white_color = (255,255,255)
+red_color = (187,17,66)
 font_name = "extra/ttf/Orbitron-Regular.ttf"
 font2_name = "extra/ttf/QuattrocentoSans-Regular.ttf"
 font = pygame.font.Font(font_name, int(100*convY))
 font2 = pygame.font.Font(font2_name, int(22*convY))
-
 font_title = pygame.font.Font(font_name, int(48*convY))
 font_subtitle = pygame.font.Font(font_name, int(28*convY))
 font_item = pygame.font.Font(font2_name, int(26*convY))
 font_itemsel = pygame.font.Font(font2_name, int(20*convY))
-help2 = font2.render("F1 - HELP , O - Extra menu", 1, (187,17, 66))
+
 
 ##filesel.py
 # load menu items
@@ -70,30 +56,39 @@ visibleitems = (limitpos - startpos) / itemh
 items2 = []
 nitems2 = 0
 filter = ""
-img_folderico = pygame.image.load("./extra/images/folder.png")
-if convX != 1 or convY != 1:
-    img_folderico = pygame.transform.scale( img_folderico, (int(img_folderico.get_width() * convX), int(img_folderico.get_height() *convY)) )
-img_title = font_title.render(title, 1, (50,50, 50))
-img_subtitle = font_subtitle.render(subtitle, 1, (50,50, 50))
+
+img_title = font_title.render(title, 1, font_color)
+img_subtitle = font_subtitle.render(subtitle, 1, font_color)
+#render_text(title,font_title)
+#render_text(subtitle,font_subtitle)
+#help2 = font2.render("F1 - HELP , O - Extra menu", 1, red_color)
 
 
-
-
-def scale_image(image, convX, convY):
+def scale_image(image):
     img = pygame.image.load("extra/images/"+image).convert_alpha()
     if convX != 1 or convY != 1:
         img = pygame.transform.scale( img, (int(img.get_width() * convX), int(img.get_height() *convY)) )
     return img
 
+def scale_element(img,pos):
+    if convX != 1 or convY != 1:
+        #img = pygame.transform.scale(img, (int(img.get_width() * convX), int(img.get_height() *convY)) )
+        pos = (pos[0]*convX,pos[1]*convY)
+    return (img,pos)
 
-def paintelement( image , px, screenX, screenY, convY ):
+def draw_element(image,position,scale=0):
+    if scale:
+        image,position = scale_element(image,position)
+    screen.blit(image,position)
+
+def render_text(text,font,position,color=font_color,antialias=1):
+    surface = font.render(text,antialias,color)
+    draw_element(surface, position)
+
+def paint_element(image, px):
     dy = (-100 * convY ) + screenY/2 - image.get_height() / 2
     dx = screenX/2- image.get_width()/2+px
-    screen.blit( image, (dx, dy) )
-
-def pintaelement( imatge, px, py, mw = 0  ):
-    mw *= convX
-    screen.blit( imatge, (px*convX, py*convY), (0, 0, mw if mw != 0 else imatge.get_width(), imatge.get_height()) );
+    draw_element(image, (dx, dy))
 
 
 def get_machines(convX,convY):
@@ -103,7 +98,7 @@ def get_machines(convX,convY):
     for s in c.sections():
         if s != "config":
             items = dict(c.items(s))
-            items["picture"] = scale_image(items["image"],convX,convY)
+            items["picture"] = scale_image(items["image"])
             machines.append(items)
     return machines,dict(c.items("config"))
 
@@ -139,7 +134,7 @@ def loadfolder( folder ):
     pitems.sort()
     current = 0
     offset = 0
-    img_folder = font_subtitle.render(currentfolder, 1, (187,17,66))
+    img_folder = font_subtitle.render(currentfolder, 1, red_color)
     prepareitems( "", True )
 
 
@@ -148,8 +143,6 @@ def filesel(title, folder, machine_img):
     loadfolder( folder )
     current = 0
     offset = 0
-
-    paint_window()
 
     img_icon = pygame.image.load("extra/images/"+machine_img)
     w = 500
@@ -234,42 +227,43 @@ def filesel(title, folder, machine_img):
 
         screen.fill((236,236,236))
 
-        pintaelement( img_title, 225, 146 )
-        pintaelement( img_folder, 900, 146 )
+        draw_element(img_title, (225, 146))
+        draw_element(img_folder, (900, 146))
         cpos = current - offset
         rectsel = pygame.Rect( selectleft*convX, (startpos+cpos*itemh-3) * convY, selwidth*convX, itemh*convY-2 )
-        screen.fill((187,17,66), rectsel )
+        screen.fill(red_color, rectsel )
 
         pospaint=0
 
         for compta in range(0, min(visibleitems, nitems2 )):
+            img_folderico = scale_image("folder.png")
             item = items2[compta+offset]
             leftpad = 0
 
             if os.path.isdir( item["value"] ):
-                pintaelement( img_folderico, listleft , startpos + (itemh * pospaint)+4 )
+                draw_element(img_folderico, (listleft, startpos+(itemh * pospaint)+4),1)
                 leftpad = 50
 
-            img_item = font_item.render(item["name"], 1, (50,50,50) if pospaint != cpos else (255,255,255))
-            pintaelement( img_item, listleft+leftpad, startpos + (itemh * pospaint), selwidth-selectmarge*2)
+            img_item = font_item.render(item["name"], 1, font_color if pospaint != cpos else white_color)
+            draw_element(img_item, (listleft+leftpad, startpos + (itemh * pospaint), selwidth-selectmarge*2),1)
 
             if( img_item.get_width() >= selwidth-selectmarge*2 ):
 
-                img_item = font_item.render("...", 1, (50,50,50) if pospaint != cpos else (255,255,255))
-                pintaelement( img_item, listleft+selwidth-selectmarge*2, startpos + (itemh * pospaint) )
+                img_item = font_item.render("...", 1, font_color if pospaint != cpos else white_color)
+                draw_element(img_item, (listleft+selwidth-selectmarge*2, startpos+(itemh * pospaint)),1)
 
             pospaint += 1
 
-        img_item = font_itemsel.render(filter, 1, (187,17,66))
-        pintaelement( img_item, listleft, startpos - 30 )
+        img_item = font_itemsel.render(filter, 1, red_color)
+        draw_element(img_item, (listleft, startpos - 30),1)
 
-        img_item = font_itemsel.render("...", 1, (187,17,66))
+        img_item = font_itemsel.render("...", 1, red_color)
 
         if offset+visibleitems < nitems2:
-            pintaelement( img_item, selectleft ,  limitpos )
+            draw_element(img_item, (selectleft , limitpos),1)
 
         if offset > 1:
-            pintaelement( img_item, selectleft,  startpos - 30 )
+            draw_element(img_item, (selectleft, startpos-30),1)
 
         rectsel = pygame.Rect( (listleft+selwidth) * convX, startpos * convY, 8*convX, (limitpos-startpos)*convY )
         screen.fill((220,220,220), rectsel )
@@ -280,18 +274,17 @@ def filesel(title, folder, machine_img):
             npos = startpos
 
         pygame.draw.circle ( screen, (180, 180, 180), (int( (listleft+selwidth+4) * convX), int(npos * convY)), 10)
-        pintaelement( img_icon, 225, 400 )
+        draw_element(img_icon, (225, 400),1)
         pygame.display.update()
 
 
 
 def main():
     tada = pygame.mixer.Sound("extra/sounds/ultimate.ogg")
-    pygame.mouse.set_visible( False )
 
     items,config = get_machines(convX,convY)
     tada.play()
-    ft = scale_image("fonstram.png",convX,convY)
+    ft = scale_image("fonstram.png")
     moving = moving_count = moving_start = offsetX = current = 0
     moving_duration = 180
     moving_dist = screenX / 2
@@ -302,8 +295,7 @@ def main():
             event = pygame.event.wait()
 
             if (event.type == KEYDOWN and (event.key == K_q or event.key == K_ESCAPE)) or (event.type == QUIT):
-                img = scale_image("On-Off.png",convX,convY)
-                screen.blit( img, (0,0))
+                draw_element(scale_image("On-Off.png"), (0,0))
                 pygame.display.update()
                 sys.exit()
 
@@ -332,19 +324,20 @@ def main():
             else:
                 offsetX = moving_dist * moving_time / moving_duration * moving
 
-#       screen.fill((230,230,230))
-        screen.blit( ft, (0,0))
+        draw_element(ft, (0,0))
 
         nom = font.render(items[current]["name"], 1, (60,60, 60))
-
         if moving == 0:
             screen.blit( nom, (screenX/2 - nom.get_width()/2, screenY - (330*convY)))
-            screen.blit( help2, ((screenX - (screenX/5) )- help2.get_width(), screenY - (935*convY)))
 
-        paintelement( items[current]["picture"], offsetX, screenX, screenY, convY )
-        paintelement( items[((current + 1) % nitems)]["picture"], offsetX +screenX/2, screenX, screenY, convY)
-        paintelement( items[((current - 1) % nitems)]["picture"], offsetX -screenX/2, screenX, screenY, convY)
+        help2 = font2.render("F1 - HELP , O - Extra menu", 1, red_color)
+        tx = (screenX - (screenX/5) ) - help2.get_width()
+        ty = screenY - (935*convY)
+        render_text("F1 - HELP , O - Extra menu",font2,(tx,ty),red_color)
 
+        paint_element(items[current]["picture"], offsetX)
+        paint_element(items[((current + 1) % nitems)]["picture"], offsetX +screenX/2)
+        paint_element(items[((current - 1) % nitems)]["picture"], offsetX -screenX/2)
         pygame.display.update()
 
 
