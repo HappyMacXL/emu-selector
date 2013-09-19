@@ -58,8 +58,8 @@ img_subtitle = font_subtitle.render(subtitle, 1, font_color)
 
 def scale_image(image,width=0,height=0):
     img = pygame.image.load("extra/images/"+image).convert_alpha()
-    h = img.get_width()  * convX
-    w = img.get_height() * convY
+    w = img.get_width()
+    h = img.get_height()
     if height > 0 and width > 0:
         h = height
         w = width
@@ -69,7 +69,7 @@ def scale_image(image,width=0,height=0):
     elif width > 0:
         w = width
         h = w / float(img.get_width()) * float(img.get_height())
-    img = pygame.transform.scale(img, (int(h), int(w)) )
+    img = pygame.transform.scale(img, (int(w * convY),int(h*convX) ))
     return img
 
 def scale_element(img,pos):
@@ -127,14 +127,7 @@ def filesel(title, folder, machine_img):
     loadfolder( folder )
     current = 0
     offset = 0
-    
-    
-    #img_icon = scale_image(machine_img)
     img_icon = scale_image(machine_img)
-    #img_icon = pygame.image.load("extra/images/"+machine_img)
-    #w = 500
-    #h = w / float(img_icon.get_width()) * float(img_icon.get_height())
-    #img_icon = pygame.transform.scale( img_icon, (int(w * convX), int(h *convY)) )
 
     while True:
         event = pygame.event.wait()
