@@ -19,7 +19,7 @@ pygame.key.set_repeat(300, 25)
 #pygame.mouse.set_visible(False)
 
 screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN|pygame.HWACCEL|pygame.HWSURFACE)
-screen = pygame.display.set_mode((0,0),pygame.HWACCEL|pygame.HWSURFACE)
+#screen = pygame.display.set_mode((0,0),pygame.HWACCEL|pygame.HWSURFACE)
 screenX = screen.get_width()
 screenY = screen.get_height()
 convX = float(screenX) / float(1920)
@@ -37,11 +37,6 @@ font_item = pygame.font.Font(font2_name, int(26*convY))
 
 
 ##filesel.py
-# load menu items
-title =  "CHAMELEONPI"
-subtitle =  "MAME"
-folder = "/home/roms"
-
 startpos = 250
 itemh = 40
 limitpos = 900
@@ -51,9 +46,6 @@ selectleft = listleft-selectmarge
 selwidth = 700
 visibleitems = (limitpos - startpos) / itemh
 pitems = []
-
-
-img_subtitle = font_subtitle.render(subtitle, 1, font_color)
 
 
 def scale_image(image,width=0,height=0):
@@ -109,7 +101,6 @@ def loadfolder( folder ):
     global currentfolder, pitems
     pitems = []
     currentfolder = folder
-
     for file in glob.glob(currentfolder+"/*"):
         try:
             filen = file.decode('utf-8')
@@ -127,7 +118,7 @@ def filesel(title, folder, machine_img):
     loadfolder( folder )
     current = 0
     offset = 0
-    img_icon = scale_image(machine_img)
+    img_icon = scale_image(machine_img,400)
 
     while True:
         event = pygame.event.wait()
@@ -136,7 +127,7 @@ def filesel(title, folder, machine_img):
         if (event.type == KEYDOWN and event.key == K_ESCAPE) or (event.type == QUIT):
             return
 
-        if event.type == KEYDOWN and event.key == K_RETURN:
+        if event.type == KEYDOWN and (event.key == K_RETURN or event.key == K_RIGHT):
             cpos = current - offset
             #don't crash when the directory is empty
             if current != -1:
@@ -145,7 +136,6 @@ def filesel(title, folder, machine_img):
                     loadfolder( fname )
                 else:
                     return pitems[current]["value"]
-
 
         if (event.type == KEYDOWN and event.key == K_LEFT):
             if currentfolder != original_folder:
@@ -164,13 +154,6 @@ def filesel(title, folder, machine_img):
             if current - offset >= visibleitems:
                 offset +=1
 
-        if (event.type == KEYDOWN and event.key == K_RIGHT):
-            cpos = current - offset
-            #don't crash when the directory is empty
-            if current != -1 and len(pitems) > 0:
-                fname = pitems[cpos]["value"];
-                if os.path.isdir( fname ):
-                    loadfolder( fname  )
         if current < 0:
             current = 0
         if current >= len(pitems):
