@@ -223,6 +223,7 @@ def main():
     moving_dist = screenX / 2
     nitems = len(items)
     while True:
+        screen.fill((236,236,236))
         draw_element(ft, (0,0))
         if moving == 0:
             event = pygame.event.wait()
