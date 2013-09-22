@@ -29,7 +29,6 @@ red_color = (187,17,66)
 font_name = "extra/ttf/Orbitron-Regular.ttf"
 font2_name = "extra/ttf/QuattrocentoSans-Regular.ttf"
 machine_font = pygame.font.Font(font_name, int(100*convY))
-font_title = pygame.font.Font(font_name, int(48*convY))
 font_subtitle = pygame.font.Font(font_name, int(28*convY))
 pitems = []
 
@@ -107,12 +106,12 @@ def loadfolder( folder ):
 def filesel(title, folder, machine_img):
     font_size = int(26*convY)
     font_item = pygame.font.Font(font2_name, font_size)
-    list_area = (screenX/16*9*convX, screenY/9*convY, screenX/16*6*convX, screenY/9*7*convY)
+    list_area = (screenX/16*9, screenY/9, screenX/16*6, screenY/9*7)
     itemh = font_size + 14
     selectmarge = 50
     selectleft = list_area[0]-selectmarge
     visibleitems = int((list_area[3]) / itemh)
-    print list_area[3], list_area[1], itemh
+    #print list_area[3], list_area[1], itemh
 
     original_folder = folder
     loadfolder(folder)
@@ -123,6 +122,7 @@ def filesel(title, folder, machine_img):
     while True:
         event = pygame.event.wait()
         screen.fill((236,236,236))
+        #screen.fill((0,255,0), pygame.Rect(list_area))
 
         if (event.type == KEYDOWN and event.key == K_ESCAPE) or (event.type == QUIT):
             return
@@ -183,7 +183,7 @@ def filesel(title, folder, machine_img):
 
         if len(pitems) > 0:
             pospaint=0
-            rectsel = pygame.Rect( selectleft*convX, (list_area[1]+cpos*itemh-3), list_area[2], itemh-2 )
+            rectsel = pygame.Rect( selectleft, (list_area[1]+cpos*itemh-3), list_area[2], itemh-2 )
             screen.fill(red_color, rectsel)
             for compta in range(0, min(visibleitems, len(pitems) )):
                 img_folderico = scale_image("folder.png")
@@ -191,34 +191,30 @@ def filesel(title, folder, machine_img):
                 leftpad = 0
 
                 if os.path.isdir( item["value"] ):
-                    draw_element(img_folderico, (list_area[0], list_area[1]+(itemh * pospaint)+4),1)
+                    draw_element(img_folderico, (list_area[0], list_area[1]+(itemh * pospaint)+4))
                     leftpad = 50
 
                 item_name = font_item.render(item["name"], 1, font_color if pospaint != cpos else white_color)
-                draw_element(item_name, (list_area[0]+leftpad, list_area[1] + (itemh * pospaint)),1)
-
+                draw_element(item_name, (list_area[0]+leftpad, list_area[1] + (itemh * pospaint)))
                 # FIXME: crop the file name
                 if ( item_name.get_width() >= list_area[2]-selectmarge*2 ):
                     item_name = font_item.render("...", 1, font_color if pospaint != cpos else white_color)
-                    draw_element(item_name, (list_area[0]+list_area[2]-selectmarge*2, list_area[1]+(itemh * pospaint)),1)
+                    draw_element(item_name, (list_area[0]+list_area[2]-selectmarge*2, list_area[1]+(itemh * pospaint)))
                 pospaint += 1
 
         if offset+visibleitems < len(pitems):
             item_name = font_item.render("...", 1, red_color)
-            draw_element(item_name, (selectleft , list_area[1]+list_area[3]),1)
+            draw_element(item_name, (selectleft , list_area[1]+list_area[3]))
         if offset > 1:
             item_name = font_item.render("...", 1, red_color)
-            draw_element(item_name, (selectleft, list_area[1]-30),1)
+            draw_element(item_name, (selectleft, list_area[1]-30))
 
-        if len(pitems)-1 > 0:
-            npos = list_area[1]+current * list_area[3] / len(pitems)-1
-        else:
-            npos = list_area[1]
-
+        if len(pitems) > 0:
+            npos = list_area[1] + current * list_area[3] / (len(pitems)-1)
+            pygame.draw.circle ( screen, red_color, (int((list_area[0]+list_area[2]+3)), int(npos)), 9)
         render_text(title,machine_font,(screenX/32,screenY/18),font_color)
         render_text(currentfolder,font_subtitle,(screenX/2,screenY/18),red_color)
         rectsel = pygame.Rect( (list_area[0]+list_area[2]), list_area[1], 6, list_area[3])
-        pygame.draw.circle ( screen, red_color, (int( (list_area[0]+list_area[2]+3)), int(npos)), 8)
         screen.fill(red_color, rectsel)
         draw_element(machine_img, (screenX/8,screenY/9),1)
         #draw file selector
@@ -248,6 +244,7 @@ def main():
                 moving = 1 if (event.key == K_LEFT) else -1
                 moving_start = pygame.time.get_ticks()
                 pygame.time.set_timer(pygame.USEREVENT, 500)
+            draw_element(ft, (0,0))
             nom = machine_font.render(items[current]["name"], 1, (60,60, 60))
             screen.blit( nom, (screenX/2 - nom.get_width()/2, screenY - int(screenY/4)) )
 
