@@ -5,18 +5,16 @@ import ConfigParser
 import pygame, sys
 import os
 from pygame.locals import *
-
-import random
-#import library
 import subprocess
-import inspect
+# play random game?
+#import random
 import glob
 
 pygame.init()
 pygame.mixer.init()
 pygame.font.init()
 pygame.key.set_repeat(300, 25)
-#pygame.mouse.set_visible(False)
+pygame.mouse.set_visible(False)
 
 screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN|pygame.HWACCEL|pygame.HWSURFACE)
 #screen = pygame.display.set_mode((0,0),pygame.HWACCEL|pygame.HWSURFACE)
@@ -33,20 +31,13 @@ font2_name = "extra/ttf/QuattrocentoSans-Regular.ttf"
 machine_font = pygame.font.Font(font_name, int(100*convY))
 font_title = pygame.font.Font(font_name, int(48*convY))
 font_subtitle = pygame.font.Font(font_name, int(28*convY))
-font_item = pygame.font.Font(font2_name, int(26*convY))
-
-
-##filesel.py
-startpos = 250
-itemh = 40
-limitpos = 900
-listleft = 900
-selectmarge = 50
-selectleft = listleft-selectmarge
-selwidth = 700
-visibleitems = (limitpos - startpos) / itemh
 pitems = []
 
+def center_element_in_area(element,area):
+    x = area[2]/2 - element.get_width()/2
+    y = area[3]/2 - element.get_height()/2
+    position = (x+area[0],y+area[1])
+    screen.blit(element,position)
 
 def scale_image(image,width=0,height=0):
     img = pygame.image.load("extra/images/"+image).convert_alpha()
@@ -110,15 +101,24 @@ def loadfolder( folder ):
             pass
         pitems.append ( {"value":filen, "name":os.path.basename(filen)} )
     pitems.sort()
-    
+
 
 
 def filesel(title, folder, machine_img):
+    font_size = int(26*convY)
+    font_item = pygame.font.Font(font2_name, font_size)
+    list_area = (screenX/16*9*convX, screenY/9*convY, screenX/16*6*convX, screenY/9*7*convY)
+    itemh = font_size + 14
+    selectmarge = 50
+    selectleft = list_area[0]-selectmarge
+    visibleitems = int((list_area[3]) / itemh)
+    print list_area[3], list_area[1], itemh
+
     original_folder = folder
-    loadfolder( folder )
+    loadfolder(folder)
     current = 0
     offset = 0
-    img_icon = scale_image(machine_img,400)
+    machine_img = scale_image(machine_img,width=screenX/4)
 
     while True:
         event = pygame.event.wait()
@@ -154,10 +154,22 @@ def filesel(title, folder, machine_img):
             if current - offset >= visibleitems:
                 offset +=1
 
+        if (event.type == KEYDOWN and (event.key == K_PAGEDOWN or event.key == K_PAGEUP)):
+            if event.key == K_PAGEUP:
+                current -= visibleitems
+                offset -= visibleitems
+            else:
+                current += visibleitems
+                offset += visibleitems
+            if current - offset >= visibleitems:
+                offset = current
+
+        #don't go outside pitems
         if current < 0:
             current = 0
         if current >= len(pitems):
             current = len(pitems)-1
+
 
         if (current < offset) or (current >= offset+visibleitems):
             offset = current
@@ -168,49 +180,48 @@ def filesel(title, folder, machine_img):
             offset = 0
 
         cpos = current - offset
-        rectsel = pygame.Rect( selectleft*convX, (startpos+cpos*itemh-3) * convY, selwidth*convX, itemh*convY-2 )
-        if len(pitems) > 0:
-            screen.fill(red_color, rectsel)
 
-        pospaint=0
-        
         if len(pitems) > 0:
+            pospaint=0
+            rectsel = pygame.Rect( selectleft*convX, (list_area[1]+cpos*itemh-3), list_area[2], itemh-2 )
+            screen.fill(red_color, rectsel)
             for compta in range(0, min(visibleitems, len(pitems) )):
                 img_folderico = scale_image("folder.png")
                 item = pitems[compta+offset]
                 leftpad = 0
 
                 if os.path.isdir( item["value"] ):
-                    draw_element(img_folderico, (listleft, startpos+(itemh * pospaint)+4),1)
+                    draw_element(img_folderico, (list_area[0], list_area[1]+(itemh * pospaint)+4),1)
                     leftpad = 50
 
-                img_item = font_item.render(item["name"], 1, font_color if pospaint != cpos else white_color)
-                draw_element(img_item, (listleft+leftpad, startpos + (itemh * pospaint), selwidth-selectmarge*2),1)
+                item_name = font_item.render(item["name"], 1, font_color if pospaint != cpos else white_color)
+                draw_element(item_name, (list_area[0]+leftpad, list_area[1] + (itemh * pospaint)),1)
 
-                if( img_item.get_width() >= selwidth-selectmarge*2 ):
-                    img_item = font_item.render("...", 1, font_color if pospaint != cpos else white_color)
-                    draw_element(img_item, (listleft+selwidth-selectmarge*2, startpos+(itemh * pospaint)),1)
+                # FIXME: crop the file name
+                if ( item_name.get_width() >= list_area[2]-selectmarge*2 ):
+                    item_name = font_item.render("...", 1, font_color if pospaint != cpos else white_color)
+                    draw_element(item_name, (list_area[0]+list_area[2]-selectmarge*2, list_area[1]+(itemh * pospaint)),1)
                 pospaint += 1
-            img_item = font_item.render("...", 1, red_color)
 
         if offset+visibleitems < len(pitems):
-            draw_element(img_item, (selectleft , limitpos),1)
-
+            item_name = font_item.render("...", 1, red_color)
+            draw_element(item_name, (selectleft , list_area[1]+list_area[3]),1)
         if offset > 1:
-            draw_element(img_item, (selectleft, startpos-30),1)
+            item_name = font_item.render("...", 1, red_color)
+            draw_element(item_name, (selectleft, list_area[1]-30),1)
 
-        if float(len(pitems)-1) > 0:
-            npos = startpos+float(current) * float(limitpos-startpos) / float(len(pitems)-1)
+        if len(pitems)-1 > 0:
+            npos = list_area[1]+current * list_area[3] / len(pitems)-1
         else:
-            npos = startpos
+            npos = list_area[1]
 
-        rectsel = pygame.Rect( (listleft+selwidth) * convX, startpos * convY, 6*convX, (limitpos-startpos)*convY )
-        pygame.draw.circle ( screen, red_color, (int( (listleft+selwidth+3) * convX), int(npos * convY)), 8)
+        render_text(title,machine_font,(screenX/32,screenY/18),font_color)
+        render_text(currentfolder,font_subtitle,(screenX/2,screenY/18),red_color)
+        rectsel = pygame.Rect( (list_area[0]+list_area[2]), list_area[1], 6, list_area[3])
+        pygame.draw.circle ( screen, red_color, (int( (list_area[0]+list_area[2]+3)), int(npos)), 8)
         screen.fill(red_color, rectsel)
-        render_text(title,font_title,(screenX/6,screenY/6),font_color)
-        draw_element(img_icon, (225, 400),1)
+        draw_element(machine_img, (screenX/8,screenY/9),1)
         #draw file selector
-        render_text(currentfolder,font_subtitle,(screenX/2,screenY/6),red_color)
         pygame.display.update()
 
 def main():
@@ -232,7 +243,7 @@ def main():
             if event.type == KEYDOWN and (event.key == K_RETURN):
                 file = filesel(items[current]["name"], items[current]["roms"], items[current]["image"])
                 if file != None:
-                    print "JUGANDO!"
+                    print "JUGANDO! %s" %(file)
             if (event.type == KEYDOWN and (event.key == K_LEFT or event.key == K_RIGHT)):
                 moving = 1 if (event.key == K_LEFT) else -1
                 moving_start = pygame.time.get_ticks()

@@ -1,8 +1,7 @@
 TODO
 ====
 * Finish the first approach to launcher
-    * Make the file selector be integrated
-    * Make sure it's working
+    * If file is too large make it smaller
     * Make the config file get extra params for emulators
         * emulator = mame
         * emu_params = -fs ...
