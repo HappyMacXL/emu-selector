@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import ConfigParser
-
 import pygame, sys
 import os
 from pygame.locals import *
@@ -9,7 +8,31 @@ import subprocess
 # play random game?
 #import random
 import glob
+import re
 
+
+#FIXME: function to convert string into tuple
+# otherwise pygame give me this error:
+# TypeError: Invalid foreground RGBA argument
+def get_color(string):
+    return tuple(int(v) for v in re.findall("[0-9]+", string))
+
+def get_config():
+    config = ConfigParser.ConfigParser()
+    config.readfp(open("config.cfg"))
+    config.readfp(open("skins/"+config.get("config","skin")+"/skin.cfg"))
+    colors = []
+    colors.append(get_color(config.get("skin","font_color")))
+    colors.append(get_color(config.get("skin","back_color")))
+    colors.append(get_color(config.get("skin","second_color")))
+    machines = []
+    for s in config.sections():
+        if s != "config" and s != "skin":
+            machines.append(dict(config.items(s)))
+    return config,colors,machines
+
+
+config,colors,machines = get_config()
 pygame.init()
 pygame.mixer.init()
 pygame.font.init()
@@ -20,12 +43,11 @@ screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN|pygame.HWACCEL|pygame.H
 #screen = pygame.display.set_mode((0,0),pygame.HWACCEL|pygame.HWSURFACE)
 screenX = screen.get_width()
 screenY = screen.get_height()
-convX = float(screenX) / float(1920)
-convY = float(screenY) / float(1080)
+resolution = config.get("skin","resolution").split("x")
+convX = float(screenX) / float(resolution[0])
+convY = float(screenY) / float(resolution[1])
 
-font_color = (50,50,50)
-white_color = (255,255,255)
-red_color = (187,17,66)
+
 font_name = "extra/ttf/Orbitron-Regular.ttf"
 font2_name = "extra/ttf/QuattrocentoSans-Regular.ttf"
 machine_font = pygame.font.Font(font_name, int(100*convY))
@@ -39,20 +61,23 @@ def center_element_in_area(element,area):
     screen.blit(element,position)
 
 def scale_image(image,width=0,height=0):
-    img = pygame.image.load("extra/images/"+image).convert_alpha()
-    w = img.get_width()
-    h = img.get_height()
-    if height > 0 and width > 0:
-        h = height
-        w = width
-    elif height > 0:
-        h = height
-        w = h / float(img.get_height()) * float(img.get_width())
-    elif width > 0:
-        w = width
-        h = w / float(img.get_width()) * float(img.get_height())
-    img = pygame.transform.scale(img, (int(w * convY),int(h*convX) ))
-    return img
+    img = pygame.image.load(image).convert_alpha()
+    if convX == 1 and convY == 1:
+        return img
+    else:
+        w = img.get_width()
+        h = img.get_height()
+        if height > 0 and width > 0:
+            h = height
+            w = width
+        elif height > 0:
+            h = height
+            w = h / float(img.get_height()) * float(img.get_width())
+        elif width > 0:
+            w = width
+            h = w / float(img.get_width()) * float(img.get_height())
+        img = pygame.transform.scale(img, (int(w * convY),int(h*convX) ))
+        return img
 
 def scale_element(img,pos):
     if convX != 1 or convY != 1:
@@ -65,7 +90,7 @@ def draw_element(image,position,scale=0):
         image,position = scale_element(image,position)
     screen.blit(image,position)
 
-def render_text(text,font,position,color=font_color,antialias=1):
+def render_text(text, font, position, color, antialias=1):
     surface = font.render(text,antialias,color)
     draw_element(surface, position)
 
@@ -73,19 +98,6 @@ def paint_element(image, px):
     dy = (-100 * convY) + screenY/2 - image.get_height()/2
     dx = screenX/2- image.get_width()/2+px
     draw_element(image, (dx, dy))
-
-
-def get_machines():
-    c = ConfigParser.ConfigParser()
-    c.readfp(open("config.cfg"))
-    machines = []
-    for s in c.sections():
-        if s != "config":
-            items = dict(c.items(s))
-            items["picture"] = scale_image(items["image"])
-            machines.append(items)
-    return machines,dict(c.items("config"))
-
 
 def loadfolder( folder ):
     global currentfolder, pitems
@@ -184,9 +196,9 @@ def filesel(title, folder, machine_img):
         if len(pitems) > 0:
             pospaint=0
             rectsel = pygame.Rect( selectleft, (list_area[1]+cpos*itemh-3), list_area[2], itemh-2 )
-            screen.fill(red_color, rectsel)
+            screen.fill(colors[1], rectsel)
             for compta in range(0, min(visibleitems, len(pitems) )):
-                img_folderico = scale_image("folder.png")
+                img_folderico = scale_image("skins/"+config.get("config","skin")+"/folder.png")
                 item = pitems[compta+offset]
                 leftpad = 0
 
@@ -194,50 +206,53 @@ def filesel(title, folder, machine_img):
                     draw_element(img_folderico, (list_area[0], list_area[1]+(itemh * pospaint)+4))
                     leftpad = 50
 
-                item_name = font_item.render(item["name"], 1, font_color if pospaint != cpos else white_color)
+                item_name = font_item.render(item["name"], 1, colors[0] if pospaint != cpos else colors[2])
                 draw_element(item_name, (list_area[0]+leftpad, list_area[1] + (itemh * pospaint)))
                 # FIXME: crop the file name
                 if ( item_name.get_width() >= list_area[2]-selectmarge*2 ):
-                    item_name = font_item.render("...", 1, font_color if pospaint != cpos else white_color)
+                    item_name = font_item.render("...", 1, colors[0] if pospaint != cpos else colors[2])
                     draw_element(item_name, (list_area[0]+list_area[2]-selectmarge*2, list_area[1]+(itemh * pospaint)))
                 pospaint += 1
 
         if offset+visibleitems < len(pitems):
-            item_name = font_item.render("...", 1, red_color)
+            item_name = font_item.render("...", 1, colors[1])
             draw_element(item_name, (selectleft , list_area[1]+list_area[3]))
         if offset > 1:
-            item_name = font_item.render("...", 1, red_color)
+            item_name = font_item.render("...", 1, colors[1])
             draw_element(item_name, (selectleft, list_area[1]-30))
 
         if len(pitems) > 0:
             npos = list_area[1] + current * list_area[3] / (len(pitems)-1)
-            pygame.draw.circle ( screen, red_color, (int((list_area[0]+list_area[2]+3)), int(npos)), 9)
-        render_text(title,machine_font,(screenX/32,screenY/18),font_color)
-        render_text(currentfolder,font_subtitle,(screenX/2,screenY/18),red_color)
+            pygame.draw.circle ( screen, colors[1], (int((list_area[0]+list_area[2]+3)), int(npos)), 9)
+        render_text(title,machine_font,(screenX/32,screenY/18),colors[0])
+        render_text(currentfolder,font_subtitle,(screenX/2,screenY/18),colors[1])
         rectsel = pygame.Rect( (list_area[0]+list_area[2]), list_area[1], 6, list_area[3])
-        screen.fill(red_color, rectsel)
+        screen.fill(colors[1], rectsel)
         draw_element(machine_img, (screenX/8,screenY/9),1)
         #draw file selector
         pygame.display.update()
 
 def main():
-    tada = pygame.mixer.Sound("extra/sounds/ultimate.ogg")
-    items,config = get_machines()
+    for i in machines:
+        i["picture"] = scale_image("extra/images/"+i["image"])
+
+    tada = pygame.mixer.Sound("skins/"+config.get("config","skin")+"tada.ogg")
     tada.play()
-    ft = scale_image("fonstram.png")
+    ft = scale_image("skins/"+config.get("config","skin")+"/background.png")
     moving = moving_count = moving_start = offsetX = current = 0
     moving_duration = 180
     moving_dist = screenX / 2
-    nitems = len(items)
+    nmachines = len(machines)
     while True:
         screen.fill((236,236,236))
         draw_element(ft, (0,0))
+
         if moving == 0:
             event = pygame.event.wait()
             if (event.type == KEYDOWN and (event.key == K_q or event.key == K_ESCAPE)) or (event.type == QUIT):
                 sys.exit()
             if event.type == KEYDOWN and (event.key == K_RETURN):
-                file = filesel(items[current]["name"], items[current]["roms"], items[current]["image"])
+                file = filesel(machines[current]["name"], machines[current]["roms"], "extra/images/"+machines[current]["image"])
                 if file != None:
                     print "JUGANDO! %s" %(file)
             if (event.type == KEYDOWN and (event.key == K_LEFT or event.key == K_RIGHT)):
@@ -245,7 +260,7 @@ def main():
                 moving_start = pygame.time.get_ticks()
                 pygame.time.set_timer(pygame.USEREVENT, 500)
             draw_element(ft, (0,0))
-            nom = machine_font.render(items[current]["name"], 1, (60,60, 60))
+            nom = machine_font.render(machines[current]["name"], 1, colors[0])
             screen.blit( nom, (screenX/2 - nom.get_width()/2, screenY - int(screenY/4)) )
 
         if moving != 0:
@@ -253,13 +268,13 @@ def main():
             if moving_time >= moving_duration:
                 offsetX = 0
                 current = current  - moving
-                current %= nitems
+                current %= nmachines
                 moving = 0
             else:
                 offsetX = moving_dist * moving_time / moving_duration * moving
-        paint_element(items[current]["picture"], offsetX)
-        paint_element(items[(current + 1) % nitems]["picture"], offsetX+screenX/2)
-        paint_element(items[(current - 1) % nitems]["picture"], offsetX-screenX/2)
+        paint_element(machines[current]["picture"], offsetX)
+        paint_element(machines[(current + 1) % nmachines]["picture"], offsetX+screenX/2)
+        paint_element(machines[(current - 1) % nmachines]["picture"], offsetX-screenX/2)
         pygame.display.update()
 
 if __name__ == "__main__":
