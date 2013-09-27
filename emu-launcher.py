@@ -25,6 +25,7 @@ def get_config():
     colors.append(get_color(config.get("skin","font_color")))
     colors.append(get_color(config.get("skin","back_color")))
     colors.append(get_color(config.get("skin","second_color")))
+    colors.append(get_color(config.get("skin","selector_color")))
     machines = []
     for s in config.sections():
         if s != "config" and s != "skin":
@@ -39,8 +40,8 @@ pygame.font.init()
 pygame.key.set_repeat(300, 25)
 pygame.mouse.set_visible(False)
 
-screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN|pygame.HWACCEL|pygame.HWSURFACE)
-#screen = pygame.display.set_mode((0,0),pygame.HWACCEL|pygame.HWSURFACE)
+#screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN|pygame.HWACCEL|pygame.HWSURFACE)
+screen = pygame.display.set_mode((0,0),pygame.HWACCEL|pygame.HWSURFACE)
 screenX = screen.get_width()
 screenY = screen.get_height()
 resolution = config.get("skin","resolution").split("x")
@@ -108,14 +109,14 @@ def loadfolder( folder ):
             filen = file.decode('utf-8')
         except Exception:
             filen = file
-            #print file
             pass
-        pitems.append ( {"value":filen, "name":os.path.basename(filen)} )
+        if os.path.basename(filen) != "README":
+            pitems.append ( {"value":filen, "name":os.path.basename(filen)} )
     pitems.sort()
 
 
 
-def filesel(title, folder, machine_img):
+def filesel(title, path,machine_img):
     font_size = int(26*convY)
     font_item = pygame.font.Font(font2_name, font_size)
     list_area = (screenX/16*9, screenY/9, screenX/16*6, screenY/9*7)
@@ -124,16 +125,16 @@ def filesel(title, folder, machine_img):
     selectleft = list_area[0]-selectmarge
     visibleitems = int((list_area[3]) / itemh)
     #print list_area[3], list_area[1], itemh
-
+    folder = "machines/"+path+"/roms"
     original_folder = folder
     loadfolder(folder)
     current = 0
     offset = 0
-    machine_img = scale_image(machine_img,width=screenX/4)
+    machine_img = scale_image(machine_img,width=screenX/2)
 
     while True:
         event = pygame.event.wait()
-        screen.fill((236,236,236))
+        screen.fill(colors[3])
         #screen.fill((0,255,0), pygame.Rect(list_area))
 
         if (event.type == KEYDOWN and event.key == K_ESCAPE) or (event.type == QUIT):
@@ -221,14 +222,15 @@ def filesel(title, folder, machine_img):
             item_name = font_item.render("...", 1, colors[1])
             draw_element(item_name, (selectleft, list_area[1]-30))
 
-        if len(pitems) > 0:
+        if len(pitems) > 1:
             npos = list_area[1] + current * list_area[3] / (len(pitems)-1)
             pygame.draw.circle ( screen, colors[1], (int((list_area[0]+list_area[2]+3)), int(npos)), 9)
-        render_text(title,machine_font,(screenX/32,screenY/18),colors[0])
         render_text(currentfolder,font_subtitle,(screenX/2,screenY/18),colors[1])
         rectsel = pygame.Rect( (list_area[0]+list_area[2]), list_area[1], 6, list_area[3])
         screen.fill(colors[1], rectsel)
-        draw_element(machine_img, (screenX/8,screenY/9),1)
+        draw_element(machine_img, (screenX/32,screenY/18),1)
+        ex = scale_image("skins/"+config.get("config","skin")+"/transparent.png",width=screenX/2)
+        draw_element(ex, (screenX/32,screenY/18),1)
         #draw file selector
         pygame.display.update()
 
@@ -236,7 +238,7 @@ def main():
     for i in machines:
         i["picture"] = scale_image("extra/images/"+i["image"])
 
-    tada = pygame.mixer.Sound("skins/"+config.get("config","skin")+"tada.ogg")
+    tada = pygame.mixer.Sound("skins/"+config.get("config","skin")+"/tada.ogg")
     tada.play()
     ft = scale_image("skins/"+config.get("config","skin")+"/background.png")
     moving = moving_count = moving_start = offsetX = current = 0
@@ -252,7 +254,7 @@ def main():
             if (event.type == KEYDOWN and (event.key == K_q or event.key == K_ESCAPE)) or (event.type == QUIT):
                 sys.exit()
             if event.type == KEYDOWN and (event.key == K_RETURN):
-                file = filesel(machines[current]["name"], machines[current]["roms"], "extra/images/"+machines[current]["image"])
+                file = filesel(machines[current]["name"], machines[current]["path"], "machines/"+machines[current]["path"]+"/marquee.png")
                 if file != None:
                     print "JUGANDO! %s" %(file)
             if (event.type == KEYDOWN and (event.key == K_LEFT or event.key == K_RIGHT)):
