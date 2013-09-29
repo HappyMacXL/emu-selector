@@ -61,40 +61,42 @@ def center_element_in_area(element,area):
     position = (x+area[0],y+area[1])
     screen.blit(element,position)
 
-def scale_image(image,width=0,height=0):
+def scale_image(image,width=0,height=0,proportion=1):
     img = pygame.image.load(image).convert_alpha()
-    if convX == 1 and convY == 1:
-        return img
-    else:
-        w = img.get_width()
-        h = img.get_height()
-        if height > 0 and width > 0:
-            h = height
-            w = width
-        elif height > 0:
+    w = img.get_width()
+    h = img.get_height()
+    if height > 0 and width > 0:
+        h = height
+        w = width
+    elif height > 0:
+        if proportion:
             h = height
             w = h / float(img.get_height()) * float(img.get_width())
-        elif width > 0:
+        else: 
+            h = height
+    elif width > 0:
+        if proportion:
             w = width
             h = w / float(img.get_width()) * float(img.get_height())
-        img = pygame.transform.scale(img, (int(w * convY),int(h*convX) ))
-        return img
+        else:
+            w = width
+    img = pygame.transform.scale(img, (int(w*convY), int(h*convX)) )
+    return img
 
-def scale_element(img,pos):
+def scale_position(pos):
     if convX != 1 or convY != 1:
-        #img = pygame.transform.scale(img, (int(img.get_width() * convX), int(img.get_height() *convY)) )
         pos = (pos[0]*convX,pos[1]*convY)
-    return (img,pos)
+    return pos
 
-def draw_element(image,position,scale=0):
-    if scale:
-        image,position = scale_element(image,position)
+def draw_element(image,position):
+    position = scale_position(position)
     screen.blit(image,position)
 
 def render_text(text, font, position, color, antialias=1):
     surface = font.render(text,antialias,color)
     draw_element(surface, position)
 
+#this should be changed to more generic function
 def paint_element(image, px):
     dy = (-100 * convY) + screenY/2 - image.get_height()/2
     dx = screenX/2- image.get_width()/2+px
@@ -116,7 +118,7 @@ def loadfolder( folder ):
 
 
 
-def filesel(title, path,machine_img):
+def filesel(title, path, machine_img):
     font_size = int(26*convY)
     font_item = pygame.font.Font(font2_name, font_size)
     list_area = (screenX/16*9, screenY/9, screenX/16*6, screenY/9*7)
@@ -130,7 +132,9 @@ def filesel(title, path,machine_img):
     loadfolder(folder)
     current = 0
     offset = 0
-    machine_img = scale_image(machine_img,width=screenX/2)
+    machine_img = scale_image(machine_img)
+    img_folderico = scale_image("skins/"+config.get("config","skin")+"/folder.png")
+    trans = scale_image("skins/"+config.get("config","skin")+"/transparent.png",height=machine_img.get_height()/2, proportion=0)
 
     while True:
         event = pygame.event.wait()
@@ -199,7 +203,6 @@ def filesel(title, path,machine_img):
             rectsel = pygame.Rect( selectleft, (list_area[1]+cpos*itemh-3), list_area[2], itemh-2 )
             screen.fill(colors[1], rectsel)
             for compta in range(0, min(visibleitems, len(pitems) )):
-                img_folderico = scale_image("skins/"+config.get("config","skin")+"/folder.png")
                 item = pitems[compta+offset]
                 leftpad = 0
 
@@ -228,9 +231,12 @@ def filesel(title, path,machine_img):
         render_text(currentfolder,font_subtitle,(screenX/2,screenY/18),colors[1])
         rectsel = pygame.Rect( (list_area[0]+list_area[2]), list_area[1], 6, list_area[3])
         screen.fill(colors[1], rectsel)
-        draw_element(machine_img, (screenX/32,screenY/18),1)
-        ex = scale_image("skins/"+config.get("config","skin")+"/transparent.png",width=screenX/2)
-        draw_element(ex, (screenX/32,screenY/18),1)
+        draw_element(machine_img, (screenX/32,screenY/18))
+        #rectimg = pygame.Rect( screenX/32*convX, (screenY/18 + where-15)*convY, screenX/2,20*convY)
+        #screen.fill((120,120,120), rectimg)
+        where = machine_img.get_height()
+        trans_height = trans.get_height()
+        draw_element(trans, (screenX/32,screenY/18 + where - trans_height))
         #draw file selector
         pygame.display.update()
 
