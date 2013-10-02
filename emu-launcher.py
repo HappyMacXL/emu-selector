@@ -72,7 +72,7 @@ def scale_image(image,width=0,height=0,proportion=1):
         if proportion:
             h = height
             w = h / float(img.get_height()) * float(img.get_width())
-        else: 
+        else:
             h = height
     elif width > 0:
         if proportion:
@@ -118,7 +118,7 @@ def loadfolder( folder ):
 
 
 
-def filesel(title, path, machine_img):
+def filesel(title, path, emulator, machine_img):
     font_size = int(26*convY)
     font_item = pygame.font.Font(font2_name, font_size)
     list_area = (screenX/16*9, screenY/9, screenX/16*6, screenY/9*7)
@@ -152,7 +152,10 @@ def filesel(title, path, machine_img):
                 if os.path.isdir( fname ):
                     loadfolder( fname )
                 else:
-                    return pitems[current]["value"]
+                    try:
+                        subprocess.call(emulator+[fname])
+                    except:
+                        print "Can't execute"
 
         if (event.type == KEYDOWN and event.key == K_LEFT):
             if currentfolder != original_folder:
@@ -260,9 +263,7 @@ def main():
             if (event.type == KEYDOWN and (event.key == K_q or event.key == K_ESCAPE)) or (event.type == QUIT):
                 sys.exit()
             if event.type == KEYDOWN and (event.key == K_RETURN):
-                file = filesel(machines[current]["name"], machines[current]["path"], "machines/"+machines[current]["path"]+"/marquee.png")
-                if file != None:
-                    print "JUGANDO! %s" %(file)
+                filesel(machines[current]["name"], machines[current]["path"],machines[current]["exec"].split(" "), "machines/"+machines[current]["path"]+"/marquee.png")
             if (event.type == KEYDOWN and (event.key == K_LEFT or event.key == K_RIGHT)):
                 moving = 1 if (event.key == K_LEFT) else -1
                 moving_start = pygame.time.get_ticks()
