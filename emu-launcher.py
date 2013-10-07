@@ -118,7 +118,7 @@ def loadfolder( folder ):
 
 
 
-def filesel(title, path, emulator, machine_img):
+def filesel(title, path, emulator, marquee):
     font_size = int(26*convY)
     font_item = pygame.font.Font(font2_name, font_size)
     list_area = (screenX/16*9, screenY/9, screenX/16*6, screenY/9*7)
@@ -132,9 +132,10 @@ def filesel(title, path, emulator, machine_img):
     loadfolder(folder)
     current = 0
     offset = 0
-    machine_img = scale_image(machine_img)
+    if marquee:
+        marquee = scale_image(marquee)
+        trans = scale_image("skins/"+config.get("config","skin")+"/transparent.png",height=marquee.get_height()/2, proportion=0)
     img_folderico = scale_image("skins/"+config.get("config","skin")+"/folder.png")
-    trans = scale_image("skins/"+config.get("config","skin")+"/transparent.png",height=machine_img.get_height()/2, proportion=0)
 
     while True:
         event = pygame.event.wait()
@@ -234,12 +235,13 @@ def filesel(title, path, emulator, machine_img):
         render_text(currentfolder,font_subtitle,(screenX/2,screenY/18),colors[1])
         rectsel = pygame.Rect( (list_area[0]+list_area[2]), list_area[1], 6, list_area[3])
         screen.fill(colors[1], rectsel)
-        draw_element(machine_img, (screenX/32,screenY/18))
+        if marquee:
+            draw_element(marquee, (screenX/32,screenY/18))
+            where = marquee.get_height()
+            trans_height = trans.get_height()
+            draw_element(trans, (screenX/32,screenY/18 + where - trans_height))
         #rectimg = pygame.Rect( screenX/32*convX, (screenY/18 + where-15)*convY, screenX/2,20*convY)
         #screen.fill((120,120,120), rectimg)
-        where = machine_img.get_height()
-        trans_height = trans.get_height()
-        draw_element(trans, (screenX/32,screenY/18 + where - trans_height))
         #draw file selector
         pygame.display.update()
 
@@ -247,8 +249,9 @@ def main():
     for i in machines:
         i["picture"] = scale_image("extra/images/"+i["image"])
 
-    tada = pygame.mixer.Sound("skins/"+config.get("config","skin")+"/tada.ogg")
-    tada.play()
+    if os.path.exists("skins/"+config.get("config","skin")+"/tada.ogg"):
+        tada = pygame.mixer.Sound("skins/"+config.get("config","skin")+"/tada.ogg")
+        tada.play()
     ft = scale_image("skins/"+config.get("config","skin")+"/background.png")
     moving = moving_count = moving_start = offsetX = current = 0
     moving_duration = 180
@@ -263,7 +266,10 @@ def main():
             if (event.type == KEYDOWN and (event.key == K_q or event.key == K_ESCAPE)) or (event.type == QUIT):
                 sys.exit()
             if event.type == KEYDOWN and (event.key == K_RETURN):
-                filesel(machines[current]["name"], machines[current]["path"],machines[current]["exec"].split(" "), "machines/"+machines[current]["path"]+"/marquee.png")
+                marquee = ""
+                if os.path.exists("machines/"+machines[current]["path"]+"/marquee.png"):
+                    marquee = "machines/"+machines[current]["path"]+"/marquee.png"
+                filesel(machines[current]["name"], machines[current]["path"],machines[current]["exec"].split(" "), marquee)
             if (event.type == KEYDOWN and (event.key == K_LEFT or event.key == K_RIGHT)):
                 moving = 1 if (event.key == K_LEFT) else -1
                 moving_start = pygame.time.get_ticks()
